@@ -113,6 +113,10 @@
     return typ === 'modry' ? 'Školní' : 'Veřejnost';
   }
 
+  // Kompatibilita se starší verzí skriptu, kde se omylem objevilo typoLabel().
+  // Po načtení nové verze tak dashboard nespadne ani při staré referenci.
+  const typoLabel = typLabel;
+
   function monthKeyToLabel(key) {
     const [y, m] = key.split('-').map(Number);
     return new Intl.DateTimeFormat('cs-CZ', { month: 'short', year: 'numeric' }).format(new Date(y, m - 1, 1));
