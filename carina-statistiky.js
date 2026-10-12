@@ -407,7 +407,7 @@
     const all = summary(data);
     const cls = type === 'modry' ? 'blue' : 'brown';
     return `<div class="cs-type-card ${cls}">
-      <div class="cs-type-title"><span class="cs-dot ${type}"></span>${typeLabel(type)}</div>
+      <div class="cs-type-title"><span class="cs-dot ${type}"></span>${typLabel(type)}</div>
       <div class="cs-mini-grid">
         <div><b>${fmtInt.format(s.projekce)}</b>projekcí</div>
         <div><b>${fmtInt.format(s.navstevnici)}</b>návštěvníků*</div>
