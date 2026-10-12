@@ -1,0 +1,130 @@
+#carina-statistiky-root {
+  --cs-bg: #f4f6f8;
+  --cs-card: #ffffff;
+  --cs-text: #1f2937;
+  --cs-muted: #667085;
+  --cs-border: #d7dde5;
+  --cs-accent: #2563eb;
+  --cs-blue: #000075;
+  --cs-brown: #800000;
+  --cs-good: #157f3b;
+  --cs-warn: #b45309;
+  --cs-danger: #b42318;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  background: rgba(13, 18, 28, 0.74);
+  overflow: auto;
+  padding: 22px;
+  box-sizing: border-box;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--cs-text);
+}
+#carina-statistiky-root * { box-sizing: border-box; }
+#carina-statistiky-root .cs-shell {
+  max-width: 1480px;
+  margin: 0 auto;
+  background: var(--cs-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,.35);
+}
+#carina-statistiky-root .cs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 22px 24px;
+  background: #111827;
+  color: white;
+}
+#carina-statistiky-root h1 { margin: 0 0 4px; font-size: 26px; }
+#carina-statistiky-root h2 { margin: 0; font-size: 19px; }
+#carina-statistiky-root h3 { margin: 0 0 12px; font-size: 16px; }
+#carina-statistiky-root .cs-subtitle { color: #cbd5e1; font-size: 14px; }
+#carina-statistiky-root .cs-close {
+  border: 0; background: #263143; color: white; width: 40px; height: 40px;
+  border-radius: 9px; font-size: 26px; cursor: pointer;
+}
+#carina-statistiky-root .cs-body { padding: 20px; }
+#carina-statistiky-root .cs-controls {
+  display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end;
+  background: white; border: 1px solid var(--cs-border); border-radius: 12px; padding: 16px;
+}
+#carina-statistiky-root .cs-field { display: grid; gap: 5px; font-size: 12px; font-weight: 700; color: #475467; }
+#carina-statistiky-root input, #carina-statistiky-root select {
+  min-height: 38px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 10px;
+  font: inherit; color: #111827; background: white;
+}
+#carina-statistiky-root .cs-segmented { display: flex; border: 1px solid #cbd5e1; border-radius: 9px; overflow: hidden; background: white; }
+#carina-statistiky-root .cs-segmented button {
+  border: 0; border-right: 1px solid #cbd5e1; padding: 9px 13px; background: white; cursor: pointer; font-weight: 700;
+}
+#carina-statistiky-root .cs-segmented button:last-child { border-right: 0; }
+#carina-statistiky-root .cs-segmented button.active { background: #111827; color: white; }
+#carina-statistiky-root .cs-button {
+  border: 0; border-radius: 8px; min-height: 38px; padding: 8px 15px; cursor: pointer; font-weight: 800;
+  background: var(--cs-accent); color: white;
+}
+#carina-statistiky-root .cs-button.secondary { background: #e8edf4; color: #243044; }
+#carina-statistiky-root .cs-button:disabled { opacity: .55; cursor: progress; }
+#carina-statistiky-root .cs-status { min-height: 24px; padding: 10px 2px 2px; color: var(--cs-muted); font-size: 14px; }
+#carina-statistiky-root .cs-status.error { color: var(--cs-danger); font-weight: 700; }
+#carina-statistiky-root .cs-kpis {
+  display: grid; grid-template-columns: repeat(6, minmax(150px, 1fr)); gap: 12px; margin: 14px 0;
+}
+#carina-statistiky-root .cs-card {
+  background: var(--cs-card); border: 1px solid var(--cs-border); border-radius: 12px; padding: 15px;
+}
+#carina-statistiky-root .cs-kpi-label { color: var(--cs-muted); font-size: 12px; font-weight: 700; }
+#carina-statistiky-root .cs-kpi-value { margin-top: 5px; font-size: 25px; font-weight: 850; letter-spacing: -.02em; }
+#carina-statistiky-root .cs-kpi-note { margin-top: 3px; color: var(--cs-muted); font-size: 11px; }
+#carina-statistiky-root .cs-grid-2 { display: grid; grid-template-columns: 1.1fr .9fr; gap: 14px; margin: 14px 0; }
+#carina-statistiky-root .cs-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+#carina-statistiky-root .cs-type-card { border: 1px solid var(--cs-border); border-left-width: 5px; border-radius: 9px; padding: 12px; }
+#carina-statistiky-root .cs-type-card.blue { border-left-color: var(--cs-blue); }
+#carina-statistiky-root .cs-type-card.brown { border-left-color: var(--cs-brown); }
+#carina-statistiky-root .cs-type-title { font-weight: 800; margin-bottom: 9px; }
+#carina-statistiky-root .cs-mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px 12px; font-size: 13px; }
+#carina-statistiky-root .cs-mini-grid b { display: block; font-size: 17px; }
+#carina-statistiky-root .cs-section { margin-top: 14px; }
+#carina-statistiky-root .cs-section-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 11px; }
+#carina-statistiky-root .cs-table-wrap { overflow: auto; border: 1px solid var(--cs-border); border-radius: 10px; }
+#carina-statistiky-root table { width: 100%; border-collapse: collapse; background: white; font-size: 13px; }
+#carina-statistiky-root th { position: sticky; top: 0; z-index: 1; background: #eef2f6; color: #344054; text-align: left; padding: 10px; border-bottom: 1px solid #cbd5e1; white-space: nowrap; }
+#carina-statistiky-root th[data-sort] { cursor: pointer; }
+#carina-statistiky-root td { padding: 10px; border-bottom: 1px solid #edf0f4; vertical-align: middle; }
+#carina-statistiky-root tbody tr:hover { background: #f8fafc; }
+#carina-statistiky-root .cs-program { color: #1d4ed8; font-weight: 800; cursor: pointer; text-decoration: none; }
+#carina-statistiky-root .cs-program:hover { text-decoration: underline; }
+#carina-statistiky-root .cs-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; }
+#carina-statistiky-root .cs-dot.modry { background: var(--cs-blue); }
+#carina-statistiky-root .cs-dot.hnedy { background: var(--cs-brown); }
+#carina-statistiky-root .cs-bar-list { display: grid; gap: 8px; }
+#carina-statistiky-root .cs-bar-row { display: grid; grid-template-columns: minmax(110px, 180px) 1fr 70px; align-items: center; gap: 9px; font-size: 12px; }
+#carina-statistiky-root .cs-bar-track { height: 12px; background: #e8edf4; border-radius: 999px; overflow: hidden; }
+#carina-statistiky-root .cs-bar-fill { height: 100%; background: #4f6fdc; border-radius: inherit; min-width: 2px; }
+#carina-statistiky-root .cs-bar-val { text-align: right; font-variant-numeric: tabular-nums; }
+#carina-statistiky-root .cs-footnote { color: var(--cs-muted); font-size: 11px; margin-top: 10px; line-height: 1.45; }
+#carina-statistiky-root .cs-empty { padding: 30px; text-align: center; color: var(--cs-muted); }
+#carina-statistiky-root .cs-modal-backdrop { position: fixed; inset: 0; z-index: 2147483647; background: rgba(4,8,15,.72); display: grid; place-items: center; padding: 20px; }
+#carina-statistiky-root .cs-modal { width: min(1180px, 96vw); max-height: 92vh; overflow: auto; background: var(--cs-bg); border-radius: 14px; box-shadow: 0 25px 80px rgba(0,0,0,.45); }
+#carina-statistiky-root .cs-modal-head { position: sticky; top: 0; z-index: 3; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 18px 20px; color: white; background: #111827; }
+#carina-statistiky-root .cs-modal-body { padding: 16px; }
+#carina-statistiky-root .cs-heat td, #carina-statistiky-root .cs-heat th { text-align: center; min-width: 66px; }
+#carina-statistiky-root .cs-heat td[data-level="1"] { background: #eff6ff; }
+#carina-statistiky-root .cs-heat td[data-level="2"] { background: #dbeafe; }
+#carina-statistiky-root .cs-heat td[data-level="3"] { background: #bfdbfe; }
+#carina-statistiky-root .cs-heat td[data-level="4"] { background: #93c5fd; }
+#carina-statistiky-root .cs-heat td[data-level="5"] { background: #60a5fa; }
+@media (max-width: 1180px) {
+  #carina-statistiky-root .cs-kpis { grid-template-columns: repeat(3, 1fr); }
+  #carina-statistiky-root .cs-grid-2 { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  #carina-statistiky-root { padding: 0; }
+  #carina-statistiky-root .cs-shell { border-radius: 0; min-height: 100vh; }
+  #carina-statistiky-root .cs-kpis { grid-template-columns: repeat(2, 1fr); }
+  #carina-statistiky-root .cs-type-grid { grid-template-columns: 1fr; }
+  #carina-statistiky-root .cs-bar-row { grid-template-columns: 100px 1fr 55px; }
+}

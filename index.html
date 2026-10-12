@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carina – statistiky pořadů</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body{margin:0;background:#eef2f6;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#1f2937}
+    .landing{max-width:860px;margin:60px auto;padding:0 20px}.box{background:white;border:1px solid #d7dde5;border-radius:14px;padding:24px;margin:16px 0;box-shadow:0 8px 30px rgba(16,24,40,.06)}
+    h1{margin:0 0 8px}.muted{color:#667085}.bookmark{display:inline-block;background:#111827;color:white;text-decoration:none;padding:12px 18px;border-radius:9px;font-weight:800;margin:8px 8px 8px 0}.copy{border:0;background:#2563eb;color:white;padding:12px 18px;border-radius:9px;font-weight:800;cursor:pointer}.code{word-break:break-all;background:#f6f8fa;border:1px solid #e5e7eb;padding:12px;border-radius:8px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}ol{line-height:1.7}
+  </style>
+</head>
+<body>
+  <main class="landing">
+    <div class="box">
+      <h1>Carina – statistiky pořadů</h1>
+      <p class="muted">Dashboard proběhlých modrých a hnědých pořadů. Skript se spouští přímo v přihlášené Carině.</p>
+    </div>
+    <div class="box">
+      <h2>Instalace záložky</h2>
+      <ol>
+        <li>Přetáhni tlačítko níže do lišty záložek, nebo zkopíruj jeho adresu jako URL nové záložky.</li>
+        <li>Otevři v Carině měsíční rozvrh, aby se uložil identifikátor kalendáře.</li>
+        <li>Kdykoliv potom klikni na záložku <b>Statistiky Carina</b>.</li>
+      </ol>
+      <a id="bookmarklet" class="bookmark" href="#">Statistiky Carina</a>
+      <button id="copy" class="copy" type="button">Kopírovat kód záložky</button>
+      <p id="copy-status" class="muted"></p>
+      <div id="code" class="code"></div>
+    </div>
+    <div class="box">
+      <h2>Co dashboard počítá</h2>
+      <p>Počet projekcí, tituly, evidovanou návštěvnost, průměr/medián, obsazenost, školní vs. veřejnost, pořadové žebříčky, měsíční trend, detail pořadu podle dnů a časů a CSV export.</p>
+      <p class="muted">Pozn.: „návštěvníci“ jsou technicky počítáni jako <b>celková kapacita − aktuálně volná místa</b> z kapacitního endpointu Cariny.</p>
+    </div>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

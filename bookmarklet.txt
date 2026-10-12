@@ -1,0 +1,4 @@
+Bookmarklet se automaticky vytvoří na publikované stránce index.html.
+
+Princip:
+javascript:(()=>{const s=document.createElement('script');s.src='ADRESA_GITHUB_PAGES/carina-statistiky.js?v='+Date.now();document.head.appendChild(s)})()
