@@ -132,13 +132,6 @@
     return ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'][index] || '';
   }
 
-  function median(values) {
-    const arr = values.filter(Number.isFinite).slice().sort((a, b) => a - b);
-    if (!arr.length) return 0;
-    const mid = Math.floor(arr.length / 2);
-    return arr.length % 2 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
-  }
-
   function avg(values) {
     const arr = values.filter(Number.isFinite);
     if (!arr.length) return 0;
@@ -320,7 +313,6 @@
       tituly: new Set(data.map(p => `${p.typ}|${p.nazev}`)).size,
       navstevnici: totalVisitors,
       prumer: valid.length ? totalVisitors / valid.length : 0,
-      median: median(valid.map(p => p.navstevnici)),
       obsazenost: percent(totalVisitors, totalCapacity),
       kapacita: totalCapacity,
       validCount: valid.length
@@ -343,7 +335,6 @@
         projekce: s.projekce,
         navstevnici: s.navstevnici,
         prumer: s.prumer,
-        median: s.median,
         obsazenost: s.obsazenost,
         minimum: vals.length ? Math.min(...vals) : 0,
         maximum: vals.length ? Math.max(...vals) : 0,
@@ -392,7 +383,6 @@
         ${kpi('Tituly', fmtInt.format(s.tituly), 'název + typ pořadu')}
         ${kpi('Návštěvníci*', fmtInt.format(s.navstevnici), 'evidovaná obsazená místa')}
         ${kpi('Ø na projekci', fmt1.format(s.prumer), 'aritmetický průměr')}
-        ${kpi('Medián', fmt1.format(s.median), 'návštěvníků / projekci')}
         ${kpi('Obsazenost', `${fmt1.format(s.obsazenost)} %`, `${fmtInt.format(s.navstevnici)} / ${fmtInt.format(s.kapacita)}`)}
       </div>`;
   }
@@ -432,7 +422,6 @@
             <th data-sort="projekce">Projekcí${arrow('projekce')}</th>
             <th data-sort="navstevnici">Návštěvníků*${arrow('navstevnici')}</th>
             <th data-sort="prumer">Ø / projekci${arrow('prumer')}</th>
-            <th data-sort="median">Medián${arrow('median')}</th>
             <th data-sort="obsazenost">Obsazenost${arrow('obsazenost')}</th>
             <th data-sort="maximum">Maximum${arrow('maximum')}</th>
             <th>Období</th>
@@ -443,7 +432,6 @@
             <td>${fmtInt.format(g.projekce)}</td>
             <td><b>${fmtInt.format(g.navstevnici)}</b></td>
             <td>${fmt1.format(g.prumer)}</td>
-            <td>${fmt1.format(g.median)}</td>
             <td>${fmt1.format(g.obsazenost)} %</td>
             <td>${fmtInt.format(g.maximum)}</td>
             <td>${formatDatumISO(g.first)} – ${formatDatumISO(g.last)}</td>
@@ -467,6 +455,7 @@
         <div class="cs-card"><h3>Nejvyšší obsazenost</h3>${bars(topOcc, 'obsazenost', 'nazev', v => `${fmt1.format(v)} %`)}</div>
         <div class="cs-card"><h3>Měsíční návštěvnost</h3>${bars(months.slice().reverse(), 'navstevnici', 'label')}</div>
       </div>
+      <div class="cs-card cs-section"><h3>Počet projekcí za měsíc</h3>${bars(months.slice().reverse(), 'projekce', 'label')}</div>
       ${renderProgramTable(data)}
       <div class="cs-footnote">* „Návštěvníci“ jsou v této verzi odvozeni jako <b>kapacita − volná místa</b> z kapacitního rozhraní Cariny. Je tedy přesnější chápat údaj jako evidovaná obsazená místa, dokud nepotvrdíme, že Carina tímto údajem reprezentuje skutečně odbavené návštěvníky.</div>`;
   }
@@ -557,7 +546,6 @@
           ${kpi('Projekce', fmtInt.format(s.projekce), 'celkem')}
           ${kpi('Návštěvníci*', fmtInt.format(s.navstevnici), 'evidovaná obsazená místa')}
           ${kpi('Ø / projekci', fmt1.format(s.prumer), 'průměr')}
-          ${kpi('Medián', fmt1.format(s.median), 'návštěvníků')}
           ${kpi('Minimum / maximum', visitors.length ? `${fmtInt.format(Math.min(...visitors))} / ${fmtInt.format(Math.max(...visitors))}` : '—', 'na jedné projekci')}
           ${kpi('Obsazenost', `${fmt1.format(s.obsazenost)} %`, 'vážená kapacitou')}
         </div>
@@ -566,9 +554,10 @@
           <div class="cs-card"><h3>Podle začátku – Ø návštěvníků</h3>${bars(byTime, 'prumer', 'label', v => fmt1.format(v), 20)}</div>
         </div>
         <div class="cs-grid-2">
-          <div class="cs-card"><h3>Vývoj po měsících</h3>${bars(months, 'navstevnici', 'label', v => fmtInt.format(v), 60)}</div>
-          <div class="cs-card"><h3>Den × čas – Ø návštěvníků</h3>${heatmap(rows)}</div>
+          <div class="cs-card"><h3>Projekce po měsících</h3>${bars(months, 'projekce', 'label', v => fmtInt.format(v), 60)}</div>
+          <div class="cs-card"><h3>Návštěvnost po měsících</h3>${bars(months, 'navstevnici', 'label', v => fmtInt.format(v), 60)}</div>
         </div>
+        <div class="cs-card cs-section"><h3>Den × čas – Ø návštěvníků</h3>${heatmap(rows)}</div>
         <div class="cs-card cs-section"><h3>Jednotlivé projekce</h3>
           <div class="cs-table-wrap"><table><thead><tr><th>Datum</th><th>Čas</th><th>Návštěvníci*</th><th>Kapacita</th><th>Obsazenost</th><th>Carina</th></tr></thead><tbody>
             ${rows.slice().sort((a,b) => datumCas(b)-datumCas(a)).map(p => `<tr><td>${formatDatumISO(p.datumISO)} ${dayLabel(dayIndex(p.datumISO))}</td><td>${esc(p.od)}</td><td><b>${Number.isFinite(p.navstevnici) ? fmtInt.format(p.navstevnici) : '—'}</b></td><td>${Number.isFinite(p.total) ? fmtInt.format(p.total) : '—'}</td><td>${Number.isFinite(p.obsazenost) ? `${fmt1.format(p.obsazenost)} %` : '—'}</td><td>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">otevřít</a>` : '—'}</td></tr>`).join('')}
@@ -609,7 +598,7 @@
   // ----------------------------
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const yearStart = `${now.getFullYear()}-01`;
+  const defaultStart = '2025-06';
 
   const root = document.createElement('div');
   root.id = ROOT_ID;
@@ -620,7 +609,7 @@
     </div>
     <div class="cs-body">
       <div class="cs-controls">
-        <label class="cs-field">Od měsíce<input type="month" id="cs-from" value="${yearStart}"></label>
+        <label class="cs-field">Od měsíce<input type="month" id="cs-from" value="${defaultStart}"></label>
         <label class="cs-field">Do měsíce<input type="month" id="cs-to" value="${currentMonth}"></label>
         <div class="cs-field"><span>Typ pořadu</span><div class="cs-segmented" id="cs-type"><button class="active" data-filter="vse">Všechny</button><button data-filter="modry">🔵 Školní</button><button data-filter="hnedy">🟤 Veřejnost</button></div></div>
         <label class="cs-field">Hledat pořad<input type="search" id="cs-search" placeholder="název pořadu"></label>
