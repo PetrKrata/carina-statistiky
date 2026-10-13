@@ -1,50 +1,29 @@
-# Carina – statistiky pořadů
+# Statistiky pořadů Carina – v4
 
-Statistický dashboard pro proběhlé pořady v Carině.
+Dashboard se spouští uvnitř přihlášené Cariny a načítá proběhlé modré (školní) a hnědé (veřejné) pořady.
 
-## Funkce
+## Co je nové ve v4
 
-- období **od–do** po měsících,
-- filtry **Vše / modré školní / hnědé veřejné**,
-- jen **proběhlé projekce**,
-- souhrn: projekce, tituly, návštěvníci, průměr, medián, obsazenost,
-- srovnání modrých a hnědých,
-- tabulka pořadů s řazením,
-- detail pořadu: počet projekcí, návštěvnost, min/max, první/poslední projekce,
-- rozpad podle dnů v týdnu a časů,
-- měsíční trend,
-- heatmapa den × čas,
-- export CSV.
-
-## Princip načítání
-
-Skript běží přímo na stránce Cariny, aby mohl použít aktuální přihlášení uživatele. Měsíční stránky načítá přes `fetch(..., credentials: 'same-origin')` a kapacity přes `POST /!capacities@schedule`.
-
-Typ pořadu se rozlišuje barvou:
-
-- modrá `#000075` → školní/dětské,
-- hnědá `#800000` → veřejnost/dospělí.
-
-Počet návštěvníků je v této verzi odvozen jako:
-
-`návštěvníci = total - available`
-
-Proto dashboard v poznámce uvádí, že jde o **evidovanou návštěvnost/obsazená místa**. Pokud Carina poskytuje samostatné pole skutečně odbavených návštěvníků, je vhodné později přepnout výpočet na něj.
-
-## Nasazení na GitHub Pages
-
-1. Nahraj všechny soubory do jednoho repozitáře.
-2. V GitHubu otevři **Settings → Pages**.
-3. Publikuj větev `main` z kořenové složky.
-4. Otevři vzniklou GitHub Pages stránku.
-5. Přetáhni tlačítko **Statistiky Carina** do lišty záložek.
-
-`index.html` generuje bookmarklet automaticky podle své vlastní adresy, takže do souborů není potřeba ručně doplňovat uživatelské jméno ani název repozitáře.
+- Historická databáze se při načtení vždy bere od **června 2025** do aktuálního měsíce.
+- Pole **Od měsíce / Do měsíce** už slouží jako filtr zobrazení. Po prvním načtení lze období měnit bez nového stahování celé historie.
+- Odstraněn blok **Nejvyšší obsazenost**.
+- Hlavní tabulka rozlišuje:
+  - **Projekcí v období** – podle právě zvoleného filtru data,
+  - **Projekcí celkem** – od června 2025,
+  - **První vysílání** a **Poslední vysílání** – z celé dostupné historie.
+- **Historie počtu projekcí** je samostatný blok:
+  - standardně posledních 12 měsíců,
+  - po rozbalení všechny měsíce od 06/2025,
+  - zobrazuje i měsíce s nulovým počtem projekcí.
+- Detail pořadu zůstává historický a používá všechna načtená data daného pořadu.
 
 ## Soubory
 
-- `index.html` – instalační stránka,
-- `app.js` – automaticky vytvoří bookmarklet,
-- `style.css` – vzhled dashboardu,
-- `carina-statistiky.js` – vlastní načítání dat a statistiky,
-- `bookmarklet.txt` – obecná šablona pro ruční instalaci.
+- `carina-statistiky.js` – hlavní dashboard a načítání Cariny
+- `style.css` – vzhled
+- `bookmarklet.txt` – kód záložky
+- `index.html`, `app.js` – pomocná stránka pro instalaci/spuštění
+
+## Důležitá poznámka k návštěvnosti
+
+Návštěvnost je zatím odvozena jako `kapacita - volná místa` z kapacitního rozhraní Cariny. Je proto vhodné údaj chápat jako evidovaná obsazená místa, dokud nebude potvrzeno, že přesně odpovídá skutečně odbaveným návštěvníkům.

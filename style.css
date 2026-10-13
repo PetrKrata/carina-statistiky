@@ -128,3 +128,32 @@
   #carina-statistiky-root .cs-type-grid { grid-template-columns: 1fr; }
   #carina-statistiky-root .cs-bar-row { grid-template-columns: 100px 1fr 55px; }
 }
+#carina-statistiky-root .cs-period-banner {
+  margin: 14px 0 0;
+  padding: 10px 13px;
+  background: #eef4ff;
+  border: 1px solid #c7d7fe;
+  border-radius: 9px;
+  color: #344054;
+  font-size: 13px;
+}
+#carina-statistiky-root .cs-period-banner span { color: var(--cs-muted); }
+#carina-statistiky-root .cs-inline-note {
+  margin-top: 4px;
+  color: var(--cs-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+#carina-statistiky-root .cs-history-details {
+  margin-top: 14px;
+  border-top: 1px solid var(--cs-border);
+  padding-top: 10px;
+}
+#carina-statistiky-root .cs-history-details summary {
+  cursor: pointer;
+  color: #1d4ed8;
+  font-weight: 800;
+  font-size: 13px;
+  user-select: none;
+}
+#carina-statistiky-root .cs-history-all { margin-top: 14px; }

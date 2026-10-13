@@ -28,7 +28,9 @@
     search: '',
     sort: { key: 'navstevnici', dir: 'desc' },
     resource: null,
-    loaded: false
+    loaded: false,
+    periodFrom: '2025-06',
+    periodTo: null
   };
 
   // ----------------------------
@@ -296,11 +298,22 @@
   // ----------------------------
   // Statistiky
   // ----------------------------
+  function projdeTypemAHledanim(p) {
+    if (state.filter !== 'vse' && p.typ !== state.filter) return false;
+    if (state.search && !p.nazev.toLocaleLowerCase('cs').includes(state.search.toLocaleLowerCase('cs'))) return false;
+    return true;
+  }
+
+  function dataHistoriePodleFiltru() {
+    return state.all.filter(projdeTypemAHledanim);
+  }
+
   function dataPodleFiltru() {
+    const from = state.periodFrom || '2025-06';
+    const to = state.periodTo || currentMonth;
     return state.all.filter(p => {
-      if (state.filter !== 'vse' && p.typ !== state.filter) return false;
-      if (state.search && !p.nazev.toLocaleLowerCase('cs').includes(state.search.toLocaleLowerCase('cs'))) return false;
-      return true;
+      if (!projdeTypemAHledanim(p)) return false;
+      return p.monthKey >= from && p.monthKey <= to;
     });
   }
 
@@ -365,6 +378,24 @@
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([key, rows]) => ({ key, label: monthKeyToLabel(key), ...summary(rows) }));
   }
 
+  function byMonthComplete(data, from = '2025-06', to = currentMonth) {
+    const grouped = new Map(byMonth(data).map(item => [item.key, item]));
+    return seznamMesicu(from, to).map(({ rok, mesic }) => {
+      const key = `${rok}-${String(mesic).padStart(2, '0')}`;
+      return grouped.get(key) || {
+        key,
+        label: monthKeyToLabel(key),
+        projekce: 0,
+        tituly: 0,
+        navstevnici: 0,
+        prumer: 0,
+        obsazenost: 0,
+        kapacita: 0,
+        validCount: 0
+      };
+    });
+  }
+
   function bars(items, valueKey, labelKey, formatter = fmtInt.format.bind(fmtInt), maxItems = 10) {
     const sliced = items.slice(0, maxItems);
     const max = Math.max(1, ...sliced.map(x => Number(x[valueKey]) || 0));
@@ -410,31 +441,45 @@
   }
 
   function renderProgramTable(data) {
-    const programs = sortPrograms(groupPrograms(data));
+    const selected = groupPrograms(data);
+    const historyMap = new Map(groupPrograms(dataHistoriePodleFiltru()).map(g => [g.key, g]));
+    const programs = sortPrograms(selected.map(g => {
+      const h = historyMap.get(g.key) || g;
+      return {
+        ...g,
+        projekceCelkem: h.projekce,
+        firstHistory: h.first,
+        lastHistory: h.last
+      };
+    }));
     const arrow = key => state.sort.key === key ? (state.sort.dir === 'asc' ? ' ▲' : ' ▼') : '';
     return `
       <div class="cs-section cs-card">
-        <div class="cs-section-head"><h2>Statistiky pořadů</h2><button class="cs-button secondary" id="cs-export">Export CSV</button></div>
+        <div class="cs-section-head"><div><h2>Statistiky pořadů</h2><div class="cs-inline-note">Výsledky za vybrané období; historie vysílání je vždy od června 2025.</div></div><button class="cs-button secondary" id="cs-export">Export CSV</button></div>
         <div class="cs-table-wrap"><table>
           <thead><tr>
             <th data-sort="nazev">Pořad${arrow('nazev')}</th>
             <th data-sort="typ">Typ${arrow('typ')}</th>
-            <th data-sort="projekce">Projekcí${arrow('projekce')}</th>
+            <th data-sort="projekce">Projekcí v období${arrow('projekce')}</th>
+            <th>Projekcí celkem</th>
             <th data-sort="navstevnici">Návštěvníků*${arrow('navstevnici')}</th>
             <th data-sort="prumer">Ø / projekci${arrow('prumer')}</th>
             <th data-sort="obsazenost">Obsazenost${arrow('obsazenost')}</th>
             <th data-sort="maximum">Maximum${arrow('maximum')}</th>
-            <th>Období</th>
+            <th>První vysílání</th>
+            <th>Poslední vysílání</th>
           </tr></thead>
           <tbody>${programs.map(g => `<tr>
             <td><a href="#" class="cs-program" data-program="${esc(g.key)}"><span class="cs-dot ${g.typ}"></span>${esc(g.nazev)}</a></td>
             <td>${esc(typLabel(g.typ))}</td>
             <td>${fmtInt.format(g.projekce)}</td>
+            <td><b>${fmtInt.format(g.projekceCelkem)}</b></td>
             <td><b>${fmtInt.format(g.navstevnici)}</b></td>
             <td>${fmt1.format(g.prumer)}</td>
             <td>${fmt1.format(g.obsazenost)} %</td>
             <td>${fmtInt.format(g.maximum)}</td>
-            <td>${formatDatumISO(g.first)} – ${formatDatumISO(g.last)}</td>
+            <td>${formatDatumISO(g.firstHistory)}</td>
+            <td>${formatDatumISO(g.lastHistory)}</td>
           </tr>`).join('')}</tbody>
         </table></div>
       </div>`;
@@ -443,19 +488,27 @@
   function renderOverview(data) {
     const programs = groupPrograms(data);
     const topVisitors = programs.slice().sort((a, b) => b.navstevnici - a.navstevnici);
-    const topOcc = programs.filter(p => p.projekce >= 2).slice().sort((a, b) => b.obsazenost - a.obsazenost);
-    const months = byMonth(data);
+    const monthsSelected = byMonth(data);
+    const history = dataHistoriePodleFiltru();
+    const historyMonths = byMonthComplete(history, '2025-06', currentMonth);
+    const recent12 = historyMonths.slice(-12);
+    const selectedLabel = `${monthKeyToLabel(state.periodFrom)} – ${monthKeyToLabel(state.periodTo)}`;
     return `
+      <div class="cs-period-banner"><b>Zvolené období:</b> ${esc(selectedLabel)} <span>• souhrny a tabulka níže se počítají z tohoto období</span></div>
       ${renderKpis(data)}
       <div class="cs-grid-2">
         <div class="cs-card"><h3>Školní vs. veřejnost</h3><div class="cs-type-grid">${typeCard('modry', data)}${typeCard('hnedy', data)}</div></div>
         <div class="cs-card"><h3>Nejnavštěvovanější pořady</h3>${bars(topVisitors, 'navstevnici', 'nazev')}</div>
       </div>
-      <div class="cs-grid-2">
-        <div class="cs-card"><h3>Nejvyšší obsazenost</h3>${bars(topOcc, 'obsazenost', 'nazev', v => `${fmt1.format(v)} %`)}</div>
-        <div class="cs-card"><h3>Měsíční návštěvnost</h3>${bars(months.slice().reverse(), 'navstevnici', 'label')}</div>
+      <div class="cs-card cs-section"><h3>Měsíční návštěvnost ve zvoleném období</h3>${bars(monthsSelected.slice().reverse(), 'navstevnici', 'label', v => fmtInt.format(v), 60)}</div>
+      <div class="cs-card cs-section">
+        <div class="cs-section-head"><div><h3>Historie počtu projekcí</h3><div class="cs-inline-note">Ve výchozím pohledu posledních 12 měsíců. Rozbalením uvidíš všechny měsíce od června 2025, včetně měsíců s nulou.</div></div></div>
+        ${bars(recent12, 'projekce', 'label', v => fmtInt.format(v), 12)}
+        <details class="cs-history-details">
+          <summary>Zobrazit všechny měsíce od června 2025</summary>
+          <div class="cs-history-all">${bars(historyMonths, 'projekce', 'label', v => fmtInt.format(v), 999)}</div>
+        </details>
       </div>
-      <div class="cs-card cs-section"><h3>Počet projekcí za měsíc</h3>${bars(months.slice().reverse(), 'projekce', 'label')}</div>
       ${renderProgramTable(data)}
       <div class="cs-footnote">* „Návštěvníci“ jsou v této verzi odvozeni jako <b>kapacita − volná místa</b> z kapacitního rozhraní Cariny. Je tedy přesnější chápat údaj jako evidovaná obsazená místa, dokud nepotvrdíme, že Carina tímto údajem reprezentuje skutečně odbavené návštěvníky.</div>`;
   }
@@ -540,10 +593,10 @@
     const backdrop = document.createElement('div');
     backdrop.className = 'cs-modal-backdrop';
     backdrop.innerHTML = `<div class="cs-modal">
-      <div class="cs-modal-head"><div><h2><span class="cs-dot ${typ}"></span>${esc(nazev)}</h2><div class="cs-subtitle">${esc(typLabel(typ))} • ${formatDatumISO(dates[0])} – ${formatDatumISO(dates.at(-1))}</div></div><button class="cs-close" id="cs-detail-close">×</button></div>
+      <div class="cs-modal-head"><div><h2><span class="cs-dot ${typ}"></span>${esc(nazev)}</h2><div class="cs-subtitle">${esc(typLabel(typ))} • první vysílání ${formatDatumISO(dates[0])} • poslední vysílání ${formatDatumISO(dates.at(-1))}</div></div><button class="cs-close" id="cs-detail-close">×</button></div>
       <div class="cs-modal-body">
         <div class="cs-kpis">
-          ${kpi('Projekce', fmtInt.format(s.projekce), 'celkem')}
+          ${kpi('Projekce celkem', fmtInt.format(s.projekce), 'od prvního vysílání')}
           ${kpi('Návštěvníci*', fmtInt.format(s.navstevnici), 'evidovaná obsazená místa')}
           ${kpi('Ø / projekci', fmt1.format(s.prumer), 'průměr')}
           ${kpi('Minimum / maximum', visitors.length ? `${fmtInt.format(Math.min(...visitors))} / ${fmtInt.format(Math.max(...visitors))}` : '—', 'na jedné projekci')}
@@ -609,8 +662,8 @@
     </div>
     <div class="cs-body">
       <div class="cs-controls">
-        <label class="cs-field">Od měsíce<input type="month" id="cs-from" value="${defaultStart}"></label>
-        <label class="cs-field">Do měsíce<input type="month" id="cs-to" value="${currentMonth}"></label>
+        <label class="cs-field">Od měsíce<input type="month" id="cs-from" min="2025-06" max="${currentMonth}" value="${defaultStart}"></label>
+        <label class="cs-field">Do měsíce<input type="month" id="cs-to" min="2025-06" max="${currentMonth}" value="${currentMonth}"></label>
         <div class="cs-field"><span>Typ pořadu</span><div class="cs-segmented" id="cs-type"><button class="active" data-filter="vse">Všechny</button><button data-filter="modry">🔵 Školní</button><button data-filter="hnedy">🟤 Veřejnost</button></div></div>
         <label class="cs-field">Hledat pořad<input type="search" id="cs-search" placeholder="název pořadu"></label>
         <button class="cs-button" id="cs-load">Načíst statistiky</button>
@@ -641,12 +694,14 @@
       }
       const from = document.getElementById('cs-from').value;
       const to = document.getElementById('cs-to').value;
-      const months = seznamMesicu(from, to);
-      const nowKey = now.getFullYear() * 12 + (now.getMonth() + 1);
-      const toParts = to.split('-').map(Number);
-      if (toParts[0] * 12 + toParts[1] > nowKey) {
-        setStatus('Období zasahuje do budoucna; budoucí projekce budou automaticky vynechány.');
-      }
+      if (from < '2025-06') throw new Error('Historie Planetária po rekonstrukci začíná v červnu 2025.');
+      seznamMesicu(from, to); // validace zvoleného období
+      state.periodFrom = from;
+      state.periodTo = to;
+
+      // Vždy načteme celou historii od června 2025 do aktuálního měsíce.
+      // Zvolená data pak fungují jako filtr bez nutnosti znovu sahat do Cariny.
+      const months = seznamMesicu('2025-06', currentMonth);
 
       let all = [];
       for (let i = 0; i < months.length; i++) {
@@ -682,7 +737,7 @@
       state.all = all;
       state.loaded = true;
       const missing = all.filter(p => !Number.isFinite(p.navstevnici)).length;
-      setStatus(`Hotovo: ${fmtInt.format(all.length)} proběhlých projekcí, ${fmtInt.format(new Set(all.map(p => `${p.typ}|${p.nazev}`)).size)} titulů.${missing ? ` U ${missing} projekcí nebyla dostupná kapacita.` : ''}`);
+      setStatus(`Hotovo: načtena historie od 06/2025 — ${fmtInt.format(all.length)} proběhlých projekcí, ${fmtInt.format(new Set(all.map(p => `${p.typ}|${p.nazev}`)).size)} titulů.${missing ? ` U ${missing} projekcí nebyla dostupná kapacita.` : ''}`);
       render();
     } catch (e) {
       console.error('Carina statistiky:', e);
@@ -709,5 +764,25 @@
     render();
   });
 
+  ['cs-from', 'cs-to'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => {
+      const from = document.getElementById('cs-from').value;
+      const to = document.getElementById('cs-to').value;
+      try {
+        if (from < '2025-06') throw new Error('Nejdřívější podporovaný měsíc je červen 2025.');
+        seznamMesicu(from, to);
+        state.periodFrom = from;
+        state.periodTo = to;
+        if (state.loaded) {
+          setStatus(`Zobrazuji období ${monthKeyToLabel(from)} – ${monthKeyToLabel(to)}. Historie zůstává načtená od 06/2025.`);
+          render();
+        }
+      } catch (e) {
+        setStatus(`CHYBA: ${e.message}`, true);
+      }
+    });
+  });
+
+  state.periodTo = currentMonth;
   render();
 })();
