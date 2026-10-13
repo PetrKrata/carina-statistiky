@@ -490,8 +490,9 @@
     const topVisitors = programs.slice().sort((a, b) => b.navstevnici - a.navstevnici);
     const monthsSelected = byMonth(data);
     const history = dataHistoriePodleFiltru();
-    const historyMonths = byMonthComplete(history, '2025-06', currentMonth);
-    const recent12 = historyMonths.slice(-12);
+    const historyMonths = byMonthComplete(history, '2025-06', currentMonth)
+      .slice()
+      .sort((a, b) => a.key.localeCompare(b.key));
     const selectedLabel = `${monthKeyToLabel(state.periodFrom)} – ${monthKeyToLabel(state.periodTo)}`;
     return `
       <div class="cs-period-banner"><b>Zvolené období:</b> ${esc(selectedLabel)} <span>• souhrny a tabulka níže se počítají z tohoto období</span></div>
@@ -502,10 +503,8 @@
       </div>
       <div class="cs-card cs-section"><h3>Měsíční návštěvnost ve zvoleném období</h3>${bars(monthsSelected.slice().reverse(), 'navstevnici', 'label', v => fmtInt.format(v), 60)}</div>
       <div class="cs-card cs-section">
-        <div class="cs-section-head"><div><h3>Historie počtu projekcí</h3><div class="cs-inline-note">Ve výchozím pohledu posledních 12 měsíců. Rozbalením uvidíš všechny měsíce od června 2025, včetně měsíců s nulou.</div></div></div>
-        ${bars(recent12, 'projekce', 'label', v => fmtInt.format(v), 12)}
         <details class="cs-history-details">
-          <summary>Zobrazit všechny měsíce od června 2025</summary>
+          <summary><b>Historie počtu projekcí</b> <span class="cs-inline-note">— zobrazit všechny měsíce od června 2025</span></summary>
           <div class="cs-history-all">${bars(historyMonths, 'projekce', 'label', v => fmtInt.format(v), 999)}</div>
         </details>
       </div>
@@ -586,11 +585,18 @@
         const v = avgs.get(key);
         if (!Number.isFinite(v)) return '<td>—</td>';
         const level = max > 0 ? clamp(Math.ceil(v / max * 5), 1, 5) : 1;
-        const highlightClass = key === minimumKey ? ' cs-heat-min' : (top3.has(key) ? ' cs-heat-top' : '');
-        const title = key === minimumKey
+        const isMin = key === minimumKey;
+        const isTop = top3.has(key) && !isMin;
+        const highlightClass = isMin ? 'cs-heat-min' : (isTop ? 'cs-heat-top' : '');
+        const title = isMin
           ? 'Nejnižší průměrná evidovaná návštěvnost'
-          : (top3.has(key) ? 'Jeden ze 3 nejvyšších průměrů návštěvnosti' : 'Průměrná evidovaná návštěvnost');
-        return `<td class="${highlightClass.trim()}" data-level="${level}" title="${title}">${fmt1.format(v)}</td>`;
+          : (isTop ? 'Jeden ze 3 nejvyšších průměrů návštěvnosti' : 'Průměrná evidovaná návštěvnost');
+        // Důležité: zvýraznění dáváme i inline, aby ho nepřebil styl Cariny
+        // ani případná starší verze style.css v cache prohlížeče.
+        const inlineStyle = isMin
+          ? 'background:#111827!important;color:#fff!important;font-weight:850;border-radius:4px;'
+          : (isTop ? 'background:#f59e0b!important;color:#111827!important;font-weight:850;border-radius:4px;' : '');
+        return `<td class="${highlightClass}" data-level="${level}" style="${inlineStyle}" title="${title}">${fmt1.format(v)}</td>`;
       }).join('')}</tr>`).join('')}
     </tbody></table></div>`;
   }
