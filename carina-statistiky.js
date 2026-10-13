@@ -1,6 +1,10 @@
 (async function () {
   'use strict';
 
+  // Fyzická kapacita kopule. Carina historicky krátce používala i hodnotu 290,
+  // pro statistiky ale vždy omezujeme kapacitu na skutečných 278 míst.
+  const MAX_KAPACITA = 278;
+
   const ROOT_ID = 'carina-statistiky-root';
   const STYLE_ID = 'carina-statistiky-style-link';
   const RESOURCE_STORAGE_KEY = 'carina-statistiky-resource';
@@ -509,7 +513,7 @@
         </details>
       </div>
       ${renderProgramTable(data)}
-      <div class="cs-footnote">* „Návštěvníci“ jsou v této verzi odvozeni jako <b>kapacita − volná místa</b> z kapacitního rozhraní Cariny. Je tedy přesnější chápat údaj jako evidovaná obsazená místa, dokud nepotvrdíme, že Carina tímto údajem reprezentuje skutečně odbavené návštěvníky.</div>`;
+      <div class="cs-footnote">* „Návštěvníci“ jsou odvozeni jako <b>efektivní kapacita − volná místa</b>. Efektivní kapacita je omezena na maximálně <b>278 míst</b>, aby krátkodobé historické nastavení Cariny na 290 míst nezkreslovalo statistiky.</div>`;
   }
 
   function render() {
@@ -749,9 +753,12 @@
       all = all.map(p => {
         const c = caps[String(p.scheduleId)];
         if (c && Number.isFinite(c.total) && Number.isFinite(c.available)) {
-          p.total = c.total;
+          // Carina měla krátce historicky nastavenou kapacitu 290.
+          // Pro všechny statistiky používáme maximálně skutečných 278 míst.
+          p.totalRaw = c.total;
+          p.total = Math.min(c.total, MAX_KAPACITA);
           p.available = c.available;
-          p.navstevnici = clamp(c.total - c.available, 0, c.total);
+          p.navstevnici = clamp(p.total - c.available, 0, p.total);
           p.obsazenost = percent(p.navstevnici, p.total);
         }
         return p;
