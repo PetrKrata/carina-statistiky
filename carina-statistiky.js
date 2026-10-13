@@ -563,17 +563,34 @@
       cells.get(key).push(p.navstevnici);
     });
     const avgs = new Map();
+    const ranked = [];
     for (const [key, values] of cells) {
       const v = avg(values);
       avgs.set(key, v);
       max = Math.max(max, v);
+      if (Number.isFinite(v)) ranked.push({ key, value: v });
     }
+
+    // Zvýraznění v tabulce Den × čas:
+    // tři nejvyšší průměry oranžově, nejnižší průměr inverzně.
+    const top3 = new Set(
+      ranked.slice().sort((a, b) => b.value - a.value).slice(0, 3).map(item => item.key)
+    );
+    const minimumKey = ranked.length
+      ? ranked.slice().sort((a, b) => a.value - b.value)[0].key
+      : null;
+
     return `<div class="cs-table-wrap"><table class="cs-heat"><thead><tr><th>Čas</th>${[0,1,2,3,4,5,6].map(d => `<th>${dayLabel(d)}</th>`).join('')}</tr></thead><tbody>
       ${times.map(t => `<tr><th>${esc(t)}</th>${[0,1,2,3,4,5,6].map(d => {
-        const v = avgs.get(`${d}|${t}`);
+        const key = `${d}|${t}`;
+        const v = avgs.get(key);
         if (!Number.isFinite(v)) return '<td>—</td>';
         const level = max > 0 ? clamp(Math.ceil(v / max * 5), 1, 5) : 1;
-        return `<td data-level="${level}" title="Průměrná evidovaná návštěvnost">${fmt1.format(v)}</td>`;
+        const highlightClass = key === minimumKey ? ' cs-heat-min' : (top3.has(key) ? ' cs-heat-top' : '');
+        const title = key === minimumKey
+          ? 'Nejnižší průměrná evidovaná návštěvnost'
+          : (top3.has(key) ? 'Jeden ze 3 nejvyšších průměrů návštěvnosti' : 'Průměrná evidovaná návštěvnost');
+        return `<td class="${highlightClass.trim()}" data-level="${level}" title="${title}">${fmt1.format(v)}</td>`;
       }).join('')}</tr>`).join('')}
     </tbody></table></div>`;
   }
@@ -593,7 +610,7 @@
     const backdrop = document.createElement('div');
     backdrop.className = 'cs-modal-backdrop';
     backdrop.innerHTML = `<div class="cs-modal">
-      <div class="cs-modal-head"><div><h2><span class="cs-dot ${typ}"></span>${esc(nazev)}</h2><div class="cs-subtitle">${esc(typLabel(typ))} • první vysílání ${formatDatumISO(dates[0])} • poslední vysílání ${formatDatumISO(dates.at(-1))}</div></div><button class="cs-close" id="cs-detail-close">×</button></div>
+      <div class="cs-modal-head"><div><h2><span class="cs-dot ${typ}"></span>${esc(nazev)}</h2><div class="cs-subtitle">První vysílání ${formatDatumISO(dates[0])} • poslední vysílání ${formatDatumISO(dates.at(-1))}</div></div><button class="cs-close" id="cs-detail-close">×</button></div>
       <div class="cs-modal-body">
         <div class="cs-kpis">
           ${kpi('Projekce celkem', fmtInt.format(s.projekce), 'od prvního vysílání')}
