@@ -429,12 +429,15 @@
     return `<div class="cs-bar-list">${sliced.map(x => {
       const val = Number(x.navstevnici) || 0;
       const showType = state.filter === 'vse';
-      const typeSuffix = showType ? ` (${x.typ === 'modry' ? 'školní' : 'veřejnost'})` : '';
-      const label = `${x.nazev}${typeSuffix}`;
+      const typeText = x.typ === 'modry' ? 'školní' : 'veřejnost';
+      const label = `${x.nazev}${showType ? ` (${typeText})` : ''}`;
       const barClass = x.typ === 'modry' ? 'cs-bar-fill-blue' : 'cs-bar-fill-brown';
-      const typeColor = x.typ === 'modry' ? '#2563eb' : '#7c2d12';
-      const barColor = x.typ === 'modry' ? '#3b82f6' : '#8b4513';
-      return `<div class="cs-bar-row"><div title="${esc(label)}" style="color:${typeColor}!important;font-weight:700">${esc(label)}</div><div class="cs-bar-track"><div class="cs-bar-fill ${barClass}" style="width:${clamp(val / max * 100, 1, 100)}%;background:${barColor}!important"></div></div><div class="cs-bar-val">${esc(fmtInt.format(val))}</div></div>`;
+      const typeColor = x.typ === 'modry' ? '#1d4ed8' : '#7c2d12';
+      const barColor = x.typ === 'modry' ? '#2563eb' : '#7f1d1d';
+      const typeBadge = showType
+        ? ` <span style="display:inline-block;padding:2px 7px;border-radius:999px;background:${barColor}!important;color:#fff!important;font-size:11px;font-weight:800;white-space:nowrap">${typeText}</span>`
+        : '';
+      return `<div class="cs-bar-row"><div title="${esc(label)}" style="color:${typeColor}!important;font-weight:700">${esc(x.nazev)}${typeBadge}</div><div class="cs-bar-track"><div class="cs-bar-fill ${barClass}" style="width:${clamp(val / max * 100, 1, 100)}%;background-color:${barColor}!important;background-image:none!important"></div></div><div class="cs-bar-val">${esc(fmtInt.format(val))}</div></div>`;
     }).join('')}</div>`;
   }
 
@@ -444,7 +447,7 @@
       <div class="cs-kpis">
         ${kpi('Projekce', fmtInt.format(s.projekce), 'proběhlé termíny')}
         ${kpi('Tituly', fmtInt.format(s.tituly), 'název + typ pořadu')}
-        ${kpi('Návštěvníci*', fmtInt.format(s.navstevnici), 'evidovaná obsazená místa')}
+        ${kpi('Návštěvníci', fmtInt.format(s.navstevnici), 'evidováno v Carině jako Sold')}
         ${kpi('Ø na projekci', fmt1.format(s.prumer), 'aritmetický průměr')}
         ${kpi('Obsazenost', `${fmt1.format(s.obsazenost)} %`, `${fmtInt.format(s.navstevnici)} / ${fmtInt.format(s.kapacita)}`)}
       </div>`;
@@ -546,7 +549,7 @@
         </details>
       </div>
       ${renderProgramTable(data)}
-      <div class="cs-footnote">* „Návštěvníci“ jsou odvozeni jako <b>efektivní kapacita − volná místa</b>. Efektivní kapacita je omezena na maximálně <b>278 míst</b>, aby krátkodobé historické nastavení Cariny na 290 míst nezkreslovalo statistiky.</div>`;
+      <div class="cs-footnote">„Návštěvníci“ vycházejí z pole <b>Sold</b> v Carině. Hodnota je pro ochranu proti chybným historickým nastavením omezena na maximálně <b>278 míst</b>.</div>`;
   }
 
   function render() {
@@ -653,7 +656,7 @@
       <div class="cs-modal-body">
         <div class="cs-kpis">
           ${kpi('Projekce celkem', fmtInt.format(s.projekce), 'od prvního vysílání')}
-          ${kpi('Návštěvníci*', fmtInt.format(s.navstevnici), 'evidovaná obsazená místa')}
+          ${kpi('Návštěvníci', fmtInt.format(s.navstevnici), 'evidováno v Carině jako Sold')}
           ${kpi('Ø / projekci', fmt1.format(s.prumer), 'průměr')}
           ${kpi('Minimum / maximum', visitors.length ? `${fmtInt.format(Math.min(...visitors))} / ${fmtInt.format(Math.max(...visitors))}` : '—', 'na jedné projekci')}
           ${kpi('Obsazenost', `${fmt1.format(s.obsazenost)} %`, 'vážená kapacitou')}
@@ -667,29 +670,29 @@
           <div class="cs-card"><h3>Návštěvnost po měsících</h3>${bars(months, 'navstevnici', 'label', v => fmtInt.format(v), 60)}</div>
         </div>
         <div class="cs-card cs-section"><h3>Den × čas – Ø návštěvníků</h3>${heatmap(rows)}</div>
-        <div class="cs-card cs-section"><h3>Jednotlivé projekce – diagnostika Cariny</h3>
-          <div class="cs-inline-note" style="margin-bottom:10px">Hodnoty Sold / Reserved / Locked / Blocked / Available / Total jsou převzaté přímo z Cariny. Sloupce „Efektivní kapacita“ a „Návštěvníci*“ jsou náš současný statistický výpočet.</div>
+        <details class="cs-card cs-section cs-history-details">
+          <summary>Jednotlivé projekce – data Cariny</summary>
+          <div class="cs-inline-note" style="margin:10px 0">Návštěvnost používá pole <b>Sold</b>. Ostatní hodnoty jsou ponechány pro kontrolu a diagnostiku.</div>
           <div class="cs-table-wrap"><table><thead><tr>
-            <th>Datum</th><th>Čas</th><th>Sold</th><th>Reserved</th><th>Locked</th><th>Blocked</th><th>Available</th><th>Total Carina</th><th>Efektivní kapacita</th><th>Návštěvníci*</th><th>Obsazenost</th><th>Mode</th><th>Carina</th>
+            <th>Datum</th><th>Čas</th><th>Návštěvníci (Sold)</th><th>Reserved</th><th>Locked</th><th>Blocked</th><th>Available</th><th>Total Carina</th><th>Efektivní kapacita</th><th>Obsazenost</th><th>Mode</th><th>Carina</th>
           </tr></thead><tbody>
             ${rows.slice().sort((a,b) => datumCas(b)-datumCas(a)).map(p => `<tr>
               <td>${formatDatumISO(p.datumISO)} ${dayLabel(dayIndex(p.datumISO))}</td>
               <td>${esc(p.od)}</td>
-              <td>${Number.isFinite(p.sold) ? fmtInt.format(p.sold) : '—'}</td>
+              <td><b>${Number.isFinite(p.navstevnici) ? fmtInt.format(p.navstevnici) : '—'}</b></td>
               <td>${Number.isFinite(p.reserved) ? fmtInt.format(p.reserved) : '—'}</td>
               <td>${Number.isFinite(p.locked) ? fmtInt.format(p.locked) : '—'}</td>
               <td>${Number.isFinite(p.blocked) ? fmtInt.format(p.blocked) : '—'}</td>
               <td>${Number.isFinite(p.available) ? fmtInt.format(p.available) : '—'}</td>
               <td>${Number.isFinite(p.totalRaw) ? fmtInt.format(p.totalRaw) : '—'}</td>
               <td>${Number.isFinite(p.total) ? fmtInt.format(p.total) : '—'}</td>
-              <td><b>${Number.isFinite(p.navstevnici) ? fmtInt.format(p.navstevnici) : '—'}</b></td>
               <td>${Number.isFinite(p.obsazenost) ? `${fmt1.format(p.obsazenost)} %` : '—'}</td>
               <td>${p.mode == null ? '—' : esc(p.mode)}</td>
               <td>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">otevřít</a>` : '—'}</td>
             </tr>`).join('')}
           </tbody></table></div>
-        </div>
-        <div class="cs-footnote">* Současný výpočet návštěvnosti = min(Total Carina, 278) − Available, omezený do rozsahu 0–278. Diagnostická pole nám umožní rozhodnout, zda pro skutečnou návštěvnost není vhodnější Sold nebo jiná kombinace údajů Cariny.</div>
+        </details>
+        <div class="cs-footnote">Návštěvnost = <b>Sold</b> z Cariny, maximálně 278. Obsazenost = návštěvnost / efektivní kapacita (max. 278).</div>
       </div>
     </div>`;
     document.getElementById(ROOT_ID).appendChild(backdrop);
@@ -705,8 +708,8 @@
 
   function exportCsv() {
     const data = dataPodleFiltru().slice().sort((a,b) => datumCas(a) - datumCas(b));
-    const header = ['Datum','Čas od','Čas do','Pořad','Typ','Sold','Reserved','Locked','Blocked','Available','Total Carina','Efektivní kapacita','Návštěvníci','Obsazenost %','Mode','UUID'];
-    const rows = data.map(p => [p.datumISO,p.od,p.do,p.nazev,typLabel(p.typ),p.sold,p.reserved,p.locked,p.blocked,p.available,p.totalRaw,p.total,p.navstevnici,Number.isFinite(p.obsazenost) ? p.obsazenost.toFixed(1) : '',p.mode,p.uuid]);
+    const header = ['Datum','Čas od','Čas do','Pořad','Typ','Návštěvníci (Sold)','Reserved','Locked','Blocked','Available','Total Carina','Efektivní kapacita','Obsazenost %','Mode','UUID'];
+    const rows = data.map(p => [p.datumISO,p.od,p.do,p.nazev,typLabel(p.typ),p.navstevnici,p.reserved,p.locked,p.blocked,p.available,p.totalRaw,p.total,Number.isFinite(p.obsazenost) ? p.obsazenost.toFixed(1) : '',p.mode,p.uuid]);
     const csv = '\uFEFF' + [header, ...rows].map(r => r.map(csvCell).join(';')).join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -798,19 +801,22 @@
       const caps = await nactiKapacityPoDavkach(ids, setStatus);
       all = all.map(p => {
         const c = caps[String(p.scheduleId)];
-        if (c && Number.isFinite(c.total) && Number.isFinite(c.available)) {
-          // Carina měla krátce historicky nastavenou kapacitu 290.
-          // Pro všechny statistiky používáme maximálně skutečných 278 míst.
-          p.totalRaw = c.total;
-          p.total = Math.min(c.total, MAX_KAPACITA);
+        if (c) {
+          p.totalRaw = Number.isFinite(c.total) ? c.total : null;
+          p.total = Number.isFinite(c.total) && c.total > 0 ? Math.min(c.total, MAX_KAPACITA) : MAX_KAPACITA;
           p.available = c.available;
           p.sold = c.sold;
           p.reserved = c.reserved;
           p.locked = c.locked;
           p.blocked = c.blocked;
           p.mode = c.mode;
-          p.navstevnici = clamp(p.total - c.available, 0, p.total);
-          p.obsazenost = percent(p.navstevnici, p.total);
+
+          // Návštěvnost bereme z pole Sold. Diagnostika ukázala, že Available
+          // zahrnuje i rezervace/blokace a u historické kapacity 290 výrazně zkresluje výsledek.
+          if (Number.isFinite(c.sold) && c.sold >= 0) {
+            p.navstevnici = clamp(c.sold, 0, MAX_KAPACITA);
+            p.obsazenost = percent(p.navstevnici, p.total);
+          }
         }
         return p;
       });
@@ -818,7 +824,7 @@
       state.all = all;
       state.loaded = true;
       const missing = all.filter(p => !Number.isFinite(p.navstevnici)).length;
-      setStatus(`Hotovo: načtena historie od 06/2025 — ${fmtInt.format(all.length)} proběhlých projekcí, ${fmtInt.format(new Set(all.map(p => `${p.typ}|${p.nazev}`)).size)} titulů.${missing ? ` U ${missing} projekcí nebyla dostupná kapacita.` : ''}`);
+      setStatus(`Hotovo: načtena historie od 06/2025 — ${fmtInt.format(all.length)} proběhlých projekcí, ${fmtInt.format(new Set(all.map(p => `${p.typ}|${p.nazev}`)).size)} titulů.${missing ? ` U ${missing} projekcí nebyl dostupný údaj Sold.` : ''}`);
       render();
     } catch (e) {
       console.error('Carina statistiky:', e);
