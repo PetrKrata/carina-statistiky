@@ -104,6 +104,8 @@
 #carina-statistiky-root .cs-bar-row { display: grid; grid-template-columns: minmax(110px, 180px) 1fr 70px; align-items: center; gap: 9px; font-size: 12px; }
 #carina-statistiky-root .cs-bar-track { height: 12px; background: #e8edf4; border-radius: 999px; overflow: hidden; }
 #carina-statistiky-root .cs-bar-fill { height: 100%; background: #4f6fdc; border-radius: inherit; min-width: 2px; }
+#carina-statistiky-root .cs-bar-fill.cs-bar-fill-blue { background: #000075; }
+#carina-statistiky-root .cs-bar-fill.cs-bar-fill-brown { background: #800000; }
 #carina-statistiky-root .cs-bar-val { text-align: right; font-variant-numeric: tabular-nums; }
 #carina-statistiky-root .cs-footnote { color: var(--cs-muted); font-size: 11px; margin-top: 10px; line-height: 1.45; }
 #carina-statistiky-root .cs-empty { padding: 30px; text-align: center; color: var(--cs-muted); }
@@ -118,7 +120,6 @@
 #carina-statistiky-root .cs-heat td[data-level="4"] { background: #93c5fd; }
 #carina-statistiky-root .cs-heat td[data-level="5"] { background: #60a5fa; }
 #carina-statistiky-root .cs-heat td.cs-heat-top { background: #f59e0b !important; color: #111827; font-weight: 850; }
-#carina-statistiky-root .cs-heat td.cs-heat-min { background: #111827 !important; color: #ffffff !important; font-weight: 850; }
 @media (max-width: 1180px) {
   #carina-statistiky-root .cs-kpis { grid-template-columns: repeat(3, 1fr); }
   #carina-statistiky-root .cs-grid-2 { grid-template-columns: 1fr; }

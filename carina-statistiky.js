@@ -410,6 +410,21 @@
     }).join('')}</div>`;
   }
 
+  function topVisitorBars(items, maxItems = 10) {
+    const sliced = items.slice(0, maxItems);
+    const max = Math.max(1, ...sliced.map(x => Number(x.navstevnici) || 0));
+    if (!sliced.length) return '<div class="cs-empty">Žádná data.</div>';
+
+    return `<div class="cs-bar-list">${sliced.map(x => {
+      const val = Number(x.navstevnici) || 0;
+      const showType = state.filter === 'vse';
+      const typeSuffix = showType ? ` (${x.typ === 'modry' ? 'školní' : 'veřejnost'})` : '';
+      const label = `${x.nazev}${typeSuffix}`;
+      const barClass = x.typ === 'modry' ? 'cs-bar-fill-blue' : 'cs-bar-fill-brown';
+      return `<div class="cs-bar-row"><div title="${esc(label)}">${esc(label)}</div><div class="cs-bar-track"><div class="cs-bar-fill ${barClass}" style="width:${clamp(val / max * 100, 1, 100)}%"></div></div><div class="cs-bar-val">${esc(fmtInt.format(val))}</div></div>`;
+    }).join('')}</div>`;
+  }
+
   function renderKpis(data) {
     const s = summary(data);
     return `
@@ -503,9 +518,14 @@
       ${renderKpis(data)}
       <div class="cs-grid-2">
         <div class="cs-card"><h3>Školní vs. veřejnost</h3><div class="cs-type-grid">${typeCard('modry', data)}${typeCard('hnedy', data)}</div></div>
-        <div class="cs-card"><h3>Nejnavštěvovanější pořady</h3>${bars(topVisitors, 'navstevnici', 'nazev')}</div>
+        <div class="cs-card"><h3>Nejnavštěvovanější pořady</h3>${topVisitorBars(topVisitors)}</div>
       </div>
-      <div class="cs-card cs-section"><h3>Měsíční návštěvnost ve zvoleném období</h3>${bars(monthsSelected.slice().reverse(), 'navstevnici', 'label', v => fmtInt.format(v), 60)}</div>
+      <div class="cs-card cs-section">
+        <details class="cs-history-details cs-monthly-details">
+          <summary><b>Měsíční návštěvnost ve zvoleném období</b> <span class="cs-inline-note">— zobrazit po měsících</span></summary>
+          <div class="cs-history-all">${bars(monthsSelected.slice().reverse(), 'navstevnici', 'label', v => fmtInt.format(v), 60)}</div>
+        </details>
+      </div>
       <div class="cs-card cs-section">
         <details class="cs-history-details">
           <summary><b>Historie počtu projekcí</b> <span class="cs-inline-note">— zobrazit všechny měsíce od června 2025</span></summary>
@@ -575,13 +595,10 @@
     }
 
     // Zvýraznění v tabulce Den × čas:
-    // tři nejvyšší průměry oranžově, nejnižší průměr inverzně.
+    // pouze tři nejlepší buňky oranžově. Všechny ostatní zůstávají v modré škále.
     const top3 = new Set(
       ranked.slice().sort((a, b) => b.value - a.value).slice(0, 3).map(item => item.key)
     );
-    const minimumKey = ranked.length
-      ? ranked.slice().sort((a, b) => a.value - b.value)[0].key
-      : null;
 
     return `<div class="cs-table-wrap"><table class="cs-heat"><thead><tr><th>Čas</th>${[0,1,2,3,4,5,6].map(d => `<th>${dayLabel(d)}</th>`).join('')}</tr></thead><tbody>
       ${times.map(t => `<tr><th>${esc(t)}</th>${[0,1,2,3,4,5,6].map(d => {
@@ -589,17 +606,16 @@
         const v = avgs.get(key);
         if (!Number.isFinite(v)) return '<td>—</td>';
         const level = max > 0 ? clamp(Math.ceil(v / max * 5), 1, 5) : 1;
-        const isMin = key === minimumKey;
-        const isTop = top3.has(key) && !isMin;
-        const highlightClass = isMin ? 'cs-heat-min' : (isTop ? 'cs-heat-top' : '');
-        const title = isMin
-          ? 'Nejnižší průměrná evidovaná návštěvnost'
-          : (isTop ? 'Jeden ze 3 nejvyšších průměrů návštěvnosti' : 'Průměrná evidovaná návštěvnost');
-        // Důležité: zvýraznění dáváme i inline, aby ho nepřebil styl Cariny
+        const isTop = top3.has(key);
+        const highlightClass = isTop ? 'cs-heat-top' : '';
+        const title = isTop
+          ? 'Jeden ze 3 nejvyšších průměrů návštěvnosti'
+          : 'Průměrná evidovaná návštěvnost';
+        // Zvýraznění dáváme i inline, aby ho nepřebil styl Cariny
         // ani případná starší verze style.css v cache prohlížeče.
-        const inlineStyle = isMin
-          ? 'background:#111827!important;color:#fff!important;font-weight:850;border-radius:4px;'
-          : (isTop ? 'background:#f59e0b!important;color:#111827!important;font-weight:850;border-radius:4px;' : '');
+        const inlineStyle = isTop
+          ? 'background:#f59e0b!important;color:#111827!important;font-weight:850;border-radius:4px;'
+          : '';
         return `<td class="${highlightClass}" data-level="${level}" style="${inlineStyle}" title="${title}">${fmt1.format(v)}</td>`;
       }).join('')}</tr>`).join('')}
     </tbody></table></div>`;
