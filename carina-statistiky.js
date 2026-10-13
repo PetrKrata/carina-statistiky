@@ -33,7 +33,7 @@
     sort: { key: 'navstevnici', dir: 'desc' },
     resource: null,
     loaded: false,
-    periodFrom: '2025-06',
+    periodFrom: '2025-06-01',
     periodTo: null
   };
 
@@ -337,11 +337,11 @@
   }
 
   function dataPodleFiltru() {
-    const from = state.periodFrom || '2025-06';
-    const to = state.periodTo || currentMonth;
+    const from = state.periodFrom || '2025-06-01';
+    const to = state.periodTo || vcerejsiDatumISO();
     return state.all.filter(p => {
       if (!projdeTypemAHledanim(p)) return false;
-      return p.monthKey >= from && p.monthKey <= to;
+      return p.datumISO >= from && p.datumISO <= to;
     });
   }
 
@@ -539,7 +539,7 @@
     const historyMonths = byMonthComplete(history, '2025-06', currentMonth)
       .slice()
       .sort((a, b) => a.key.localeCompare(b.key));
-    const selectedLabel = `${monthKeyToLabel(state.periodFrom)} – ${monthKeyToLabel(state.periodTo)}`;
+    const selectedLabel = `${formatDatumISO(state.periodFrom)} – ${formatDatumISO(state.periodTo)}`;
     return `
       <div class="cs-period-banner"><b>Zvolené období:</b> ${esc(selectedLabel)} <span>• souhrny a tabulka níže se počítají z tohoto období</span></div>
       ${renderKpis(data)}
@@ -732,8 +732,9 @@
   // UI
   // ----------------------------
   const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const defaultStart = '2025-06';
+  const yesterdayISO = vcerejsiDatumISO();
+  const currentMonth = yesterdayISO.slice(0, 7);
+  const defaultStart = '2025-06-01';
 
   const root = document.createElement('div');
   root.id = ROOT_ID;
@@ -744,8 +745,8 @@
     </div>
     <div class="cs-body">
       <div class="cs-controls">
-        <label class="cs-field">Od měsíce<input type="month" id="cs-from" min="2025-06" max="${currentMonth}" value="${defaultStart}"></label>
-        <label class="cs-field">Do měsíce<input type="month" id="cs-to" min="2025-06" max="${currentMonth}" value="${currentMonth}"></label>
+        <label class="cs-field">Od data<input type="date" id="cs-from" min="2025-06-01" max="${yesterdayISO}" value="${defaultStart}"></label>
+        <label class="cs-field">Do data<input type="date" id="cs-to" min="2025-06-01" max="${yesterdayISO}" value="${yesterdayISO}"></label>
         <div class="cs-field"><span>Typ pořadu</span><div class="cs-segmented" id="cs-type"><button class="active" data-filter="vse">Všechny</button><button data-filter="modry">🔵 Školní</button><button data-filter="hnedy">🟤 Veřejnost</button></div></div>
         <label class="cs-field">Hledat pořad<input type="search" id="cs-search" placeholder="název pořadu"></label>
         <button class="cs-button" id="cs-load">Načíst statistiky</button>
@@ -776,10 +777,11 @@
       }
       const from = document.getElementById('cs-from').value;
       const to = document.getElementById('cs-to').value;
-      if (from < '2025-06') throw new Error('Historie Planetária po rekonstrukci začíná v červnu 2025.');
-      seznamMesicu(from, to); // validace zvoleného období
+      if (from < '2025-06-01') throw new Error('Historie Planetária po rekonstrukci začíná 1. června 2025.');
+      if (from > to) throw new Error('Datum Od musí být nejpozději datum Do.');
+      const effectiveTo = to > yesterdayISO ? yesterdayISO : to;
       state.periodFrom = from;
-      state.periodTo = to;
+      state.periodTo = effectiveTo;
 
       // Vždy načteme celou historii od června 2025 do aktuálního měsíce.
       // Zvolená data pak fungují jako filtr bez nutnosti znovu sahat do Cariny.
@@ -830,7 +832,7 @@
       state.all = all;
       state.loaded = true;
       const missing = all.filter(p => !Number.isFinite(p.navstevnici)).length;
-      setStatus(`Hotovo: načtena historie od 06/2025 do ${formatDatumISO(vcerejsiDatumISO())} — ${fmtInt.format(all.length)} projekcí, ${fmtInt.format(new Set(all.map(p => `${p.typ}|${p.nazev}`)).size)} titulů.${missing ? ` U ${missing} projekcí nebyl dostupný údaj Sold.` : ''}`);
+      setStatus(`Hotovo: načtena historie od 01.06.2025 do ${formatDatumISO(yesterdayISO)} — ${fmtInt.format(all.length)} projekcí, ${fmtInt.format(new Set(all.map(p => `${p.typ}|${p.nazev}`)).size)} titulů.${missing ? ` U ${missing} projekcí nebyl dostupný údaj Sold.` : ''}`);
       render();
     } catch (e) {
       console.error('Carina statistiky:', e);
@@ -862,12 +864,13 @@
       const from = document.getElementById('cs-from').value;
       const to = document.getElementById('cs-to').value;
       try {
-        if (from < '2025-06') throw new Error('Nejdřívější podporovaný měsíc je červen 2025.');
-        seznamMesicu(from, to);
+        if (from < '2025-06-01') throw new Error('Nejdřívější podporované datum je 1. června 2025.');
+        if (from > to) throw new Error('Datum Od musí být nejpozději datum Do.');
+        const effectiveTo = to > yesterdayISO ? yesterdayISO : to;
         state.periodFrom = from;
-        state.periodTo = to;
+        state.periodTo = effectiveTo;
         if (state.loaded) {
-          setStatus(`Zobrazuji období ${monthKeyToLabel(from)} – ${monthKeyToLabel(to)}. Historie zůstává načtená od 06/2025.`);
+          setStatus(`Zobrazuji období ${formatDatumISO(from)} – ${formatDatumISO(effectiveTo)}. Historie zůstává načtená od 01.06.2025 do včerejška.`);
           render();
         }
       } catch (e) {
@@ -876,6 +879,6 @@
     });
   });
 
-  state.periodTo = currentMonth;
+  state.periodTo = yesterdayISO;
   render();
 })();
