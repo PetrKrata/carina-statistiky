@@ -27,3 +27,9 @@ Dashboard se spouští uvnitř přihlášené Cariny a načítá proběhlé modr
 ## Důležitá poznámka k návštěvnosti
 
 Návštěvnost je zatím odvozena jako `kapacita - volná místa` z kapacitního rozhraní Cariny. Je proto vhodné údaj chápat jako evidovaná obsazená místa, dokud nebude potvrzeno, že přesně odpovídá skutečně odbaveným návštěvníkům.
+
+## Diagnostická verze návštěvnosti
+
+V detailu pořadu se u jednotlivých projekcí zobrazují také surové hodnoty z Cariny: `sold`, `reserved`, `locked`, `blocked`, `available`, `total` a `mode`. Vedle nich je efektivní kapacita (max. 278) a současný výpočet návštěvnosti. Cílem je ověřit, které pole nejlépe odpovídá skutečné návštěvnosti historických pořadů.
+
+Graf „Nejnavštěvovanější pořady“ při filtru Všechny používá modrou pro školní pořady a hnědou pro veřejnost; barvy jsou nastavené přímo na prvcích, aby je nepřepsalo CSS Cariny.

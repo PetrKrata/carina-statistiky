@@ -259,6 +259,12 @@
         url: urlUdalosti(uuid),
         available: null,
         total: null,
+        totalRaw: null,
+        sold: null,
+        reserved: null,
+        locked: null,
+        blocked: null,
+        mode: null,
         navstevnici: null,
         obsazenost: null
       };
@@ -282,8 +288,13 @@
     const map = {};
     json.forEach(item => {
       map[String(item.schedule_id)] = {
-        available: Number(item.available),
-        total: Number(item.total)
+        available: item.available == null || item.available === '' ? null : Number(item.available),
+        total: item.total == null || item.total === '' ? null : Number(item.total),
+        sold: item.sold == null || item.sold === '' ? null : Number(item.sold),
+        reserved: item.reserved == null || item.reserved === '' ? null : Number(item.reserved),
+        locked: item.locked == null || item.locked === '' ? null : Number(item.locked),
+        blocked: item.blocked == null || item.blocked === '' ? null : Number(item.blocked),
+        mode: item.mode == null ? null : String(item.mode)
       };
     });
     return map;
@@ -421,7 +432,9 @@
       const typeSuffix = showType ? ` (${x.typ === 'modry' ? 'školní' : 'veřejnost'})` : '';
       const label = `${x.nazev}${typeSuffix}`;
       const barClass = x.typ === 'modry' ? 'cs-bar-fill-blue' : 'cs-bar-fill-brown';
-      return `<div class="cs-bar-row"><div title="${esc(label)}">${esc(label)}</div><div class="cs-bar-track"><div class="cs-bar-fill ${barClass}" style="width:${clamp(val / max * 100, 1, 100)}%"></div></div><div class="cs-bar-val">${esc(fmtInt.format(val))}</div></div>`;
+      const typeColor = x.typ === 'modry' ? '#2563eb' : '#7c2d12';
+      const barColor = x.typ === 'modry' ? '#3b82f6' : '#8b4513';
+      return `<div class="cs-bar-row"><div title="${esc(label)}" style="color:${typeColor}!important;font-weight:700">${esc(label)}</div><div class="cs-bar-track"><div class="cs-bar-fill ${barClass}" style="width:${clamp(val / max * 100, 1, 100)}%;background:${barColor}!important"></div></div><div class="cs-bar-val">${esc(fmtInt.format(val))}</div></div>`;
     }).join('')}</div>`;
   }
 
@@ -654,12 +667,29 @@
           <div class="cs-card"><h3>Návštěvnost po měsících</h3>${bars(months, 'navstevnici', 'label', v => fmtInt.format(v), 60)}</div>
         </div>
         <div class="cs-card cs-section"><h3>Den × čas – Ø návštěvníků</h3>${heatmap(rows)}</div>
-        <div class="cs-card cs-section"><h3>Jednotlivé projekce</h3>
-          <div class="cs-table-wrap"><table><thead><tr><th>Datum</th><th>Čas</th><th>Návštěvníci*</th><th>Kapacita</th><th>Obsazenost</th><th>Carina</th></tr></thead><tbody>
-            ${rows.slice().sort((a,b) => datumCas(b)-datumCas(a)).map(p => `<tr><td>${formatDatumISO(p.datumISO)} ${dayLabel(dayIndex(p.datumISO))}</td><td>${esc(p.od)}</td><td><b>${Number.isFinite(p.navstevnici) ? fmtInt.format(p.navstevnici) : '—'}</b></td><td>${Number.isFinite(p.total) ? fmtInt.format(p.total) : '—'}</td><td>${Number.isFinite(p.obsazenost) ? `${fmt1.format(p.obsazenost)} %` : '—'}</td><td>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">otevřít</a>` : '—'}</td></tr>`).join('')}
+        <div class="cs-card cs-section"><h3>Jednotlivé projekce – diagnostika Cariny</h3>
+          <div class="cs-inline-note" style="margin-bottom:10px">Hodnoty Sold / Reserved / Locked / Blocked / Available / Total jsou převzaté přímo z Cariny. Sloupce „Efektivní kapacita“ a „Návštěvníci*“ jsou náš současný statistický výpočet.</div>
+          <div class="cs-table-wrap"><table><thead><tr>
+            <th>Datum</th><th>Čas</th><th>Sold</th><th>Reserved</th><th>Locked</th><th>Blocked</th><th>Available</th><th>Total Carina</th><th>Efektivní kapacita</th><th>Návštěvníci*</th><th>Obsazenost</th><th>Mode</th><th>Carina</th>
+          </tr></thead><tbody>
+            ${rows.slice().sort((a,b) => datumCas(b)-datumCas(a)).map(p => `<tr>
+              <td>${formatDatumISO(p.datumISO)} ${dayLabel(dayIndex(p.datumISO))}</td>
+              <td>${esc(p.od)}</td>
+              <td>${Number.isFinite(p.sold) ? fmtInt.format(p.sold) : '—'}</td>
+              <td>${Number.isFinite(p.reserved) ? fmtInt.format(p.reserved) : '—'}</td>
+              <td>${Number.isFinite(p.locked) ? fmtInt.format(p.locked) : '—'}</td>
+              <td>${Number.isFinite(p.blocked) ? fmtInt.format(p.blocked) : '—'}</td>
+              <td>${Number.isFinite(p.available) ? fmtInt.format(p.available) : '—'}</td>
+              <td>${Number.isFinite(p.totalRaw) ? fmtInt.format(p.totalRaw) : '—'}</td>
+              <td>${Number.isFinite(p.total) ? fmtInt.format(p.total) : '—'}</td>
+              <td><b>${Number.isFinite(p.navstevnici) ? fmtInt.format(p.navstevnici) : '—'}</b></td>
+              <td>${Number.isFinite(p.obsazenost) ? `${fmt1.format(p.obsazenost)} %` : '—'}</td>
+              <td>${p.mode == null ? '—' : esc(p.mode)}</td>
+              <td>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">otevřít</a>` : '—'}</td>
+            </tr>`).join('')}
           </tbody></table></div>
         </div>
-        <div class="cs-footnote">* Návštěvnost je odvozena jako kapacita − volná místa.</div>
+        <div class="cs-footnote">* Současný výpočet návštěvnosti = min(Total Carina, 278) − Available, omezený do rozsahu 0–278. Diagnostická pole nám umožní rozhodnout, zda pro skutečnou návštěvnost není vhodnější Sold nebo jiná kombinace údajů Cariny.</div>
       </div>
     </div>`;
     document.getElementById(ROOT_ID).appendChild(backdrop);
@@ -675,8 +705,8 @@
 
   function exportCsv() {
     const data = dataPodleFiltru().slice().sort((a,b) => datumCas(a) - datumCas(b));
-    const header = ['Datum','Čas od','Čas do','Pořad','Typ','Kapacita','Volno','Návštěvníci','Obsazenost %','UUID'];
-    const rows = data.map(p => [p.datumISO,p.od,p.do,p.nazev,typLabel(p.typ),p.total,p.available,p.navstevnici,Number.isFinite(p.obsazenost) ? p.obsazenost.toFixed(1) : '',p.uuid]);
+    const header = ['Datum','Čas od','Čas do','Pořad','Typ','Sold','Reserved','Locked','Blocked','Available','Total Carina','Efektivní kapacita','Návštěvníci','Obsazenost %','Mode','UUID'];
+    const rows = data.map(p => [p.datumISO,p.od,p.do,p.nazev,typLabel(p.typ),p.sold,p.reserved,p.locked,p.blocked,p.available,p.totalRaw,p.total,p.navstevnici,Number.isFinite(p.obsazenost) ? p.obsazenost.toFixed(1) : '',p.mode,p.uuid]);
     const csv = '\uFEFF' + [header, ...rows].map(r => r.map(csvCell).join(';')).join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -774,6 +804,11 @@
           p.totalRaw = c.total;
           p.total = Math.min(c.total, MAX_KAPACITA);
           p.available = c.available;
+          p.sold = c.sold;
+          p.reserved = c.reserved;
+          p.locked = c.locked;
+          p.blocked = c.blocked;
+          p.mode = c.mode;
           p.navstevnici = clamp(p.total - c.available, 0, p.total);
           p.obsazenost = percent(p.navstevnici, p.total);
         }
