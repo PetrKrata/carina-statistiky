@@ -683,22 +683,17 @@
         <div class="cs-card cs-section"><h3>Den × čas – Ø návštěvníků</h3>${heatmap(rows)}</div>
         <details class="cs-card cs-section cs-history-details">
           <summary>Jednotlivé projekce – data Cariny</summary>
-          <div class="cs-inline-note" style="margin:10px 0">Návštěvnost používá pole <b>Sold</b>. Ostatní hodnoty jsou ponechány pro kontrolu a diagnostiku.</div>
+          <div class="cs-inline-note" style="margin:10px 0">Prodané = <b>Sold</b>, neprodané = <b>Available</b>, počet míst v sále = <b>Total</b> (pro výpočty maximálně 278).</div>
           <div class="cs-table-wrap"><table><thead><tr>
-            <th>Datum</th><th>Čas</th><th>Návštěvníci (Sold)</th><th>Reserved</th><th>Locked</th><th>Blocked</th><th>Available</th><th>Total Carina</th><th>Efektivní kapacita</th><th>Obsazenost</th><th>Mode</th><th>Carina</th>
+            <th>Datum</th><th>Čas</th><th>Prodané</th><th>Neprodané</th><th>Počet míst v sále</th><th>Obsazenost</th><th>Carina</th>
           </tr></thead><tbody>
             ${rows.slice().sort((a,b) => datumCas(b)-datumCas(a)).map(p => `<tr>
               <td>${formatDatumISO(p.datumISO)} ${dayLabel(dayIndex(p.datumISO))}</td>
               <td>${esc(p.od)}</td>
               <td><b>${Number.isFinite(p.navstevnici) ? fmtInt.format(p.navstevnici) : '—'}</b></td>
-              <td>${Number.isFinite(p.reserved) ? fmtInt.format(p.reserved) : '—'}</td>
-              <td>${Number.isFinite(p.locked) ? fmtInt.format(p.locked) : '—'}</td>
-              <td>${Number.isFinite(p.blocked) ? fmtInt.format(p.blocked) : '—'}</td>
               <td>${Number.isFinite(p.available) ? fmtInt.format(p.available) : '—'}</td>
-              <td>${Number.isFinite(p.totalRaw) ? fmtInt.format(p.totalRaw) : '—'}</td>
               <td>${Number.isFinite(p.total) ? fmtInt.format(p.total) : '—'}</td>
               <td>${Number.isFinite(p.obsazenost) ? `${fmt1.format(p.obsazenost)} %` : '—'}</td>
-              <td>${p.mode == null ? '—' : esc(p.mode)}</td>
               <td>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">otevřít</a>` : '—'}</td>
             </tr>`).join('')}
           </tbody></table></div>
@@ -719,8 +714,8 @@
 
   function exportCsv() {
     const data = dataPodleFiltru().slice().sort((a,b) => datumCas(a) - datumCas(b));
-    const header = ['Datum','Čas od','Čas do','Pořad','Typ','Návštěvníci (Sold)','Reserved','Locked','Blocked','Available','Total Carina','Efektivní kapacita','Obsazenost %','Mode','UUID'];
-    const rows = data.map(p => [p.datumISO,p.od,p.do,p.nazev,typLabel(p.typ),p.navstevnici,p.reserved,p.locked,p.blocked,p.available,p.totalRaw,p.total,Number.isFinite(p.obsazenost) ? p.obsazenost.toFixed(1) : '',p.mode,p.uuid]);
+    const header = ['Datum','Čas od','Čas do','Pořad','Typ','Prodané (Sold)','Neprodané (Available)','Počet míst v sále','Obsazenost %','UUID'];
+    const rows = data.map(p => [p.datumISO,p.od,p.do,p.nazev,typLabel(p.typ),p.navstevnici,p.available,p.total,Number.isFinite(p.obsazenost) ? p.obsazenost.toFixed(1) : '',p.uuid]);
     const csv = '\uFEFF' + [header, ...rows].map(r => r.map(csvCell).join(';')).join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
