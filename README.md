@@ -19,3 +19,8 @@ Pole `sold` je nejlepší dostupný údaj Cariny pro evidovanou návštěvnost/p
 ## Verze v11
 - Statistiky zahrnují pouze projekce do včerejšího dne včetně. Dnešní projekce se nezapočítávají ani po skončení, takže se výsledky během dne nemění.
 - U žebříčku „Nejnavštěvovanější pořady“ je typ pořadu zobrazen pouze jako text `(školní)` / `(veřejnost)` bez barevné bubliny; barevné rozlišení názvu a sloupce zůstává.
+
+## v14 – zvolené období v detailu
+- Detail konkrétního pořadu respektuje datumový filtr Od–Do z hlavního přehledu.
+- KPI, rozpad podle dnů/časů, měsíční grafy, heatmapa a seznam projekcí jsou jen za zvolené období.
+- První a poslední vysílání zůstávají informací z celé dostupné historie od 1. 6. 2025.

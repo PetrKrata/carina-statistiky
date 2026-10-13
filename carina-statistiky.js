@@ -651,22 +651,31 @@
   function openDetail(key) {
     const [typ, ...nameParts] = key.split('|');
     const nazev = nameParts.join('|');
-    const rows = state.all.filter(p => p.typ === typ && p.nazev === nazev);
+
+    // Celá dostupná historie pořadu slouží jen pro informaci o prvním/posledním vysílání.
+    const historyRows = state.all.filter(p => p.typ === typ && p.nazev === nazev);
+    if (!historyRows.length) return;
+
+    // Všechny ostatní statistiky detailu respektují právě zvolené období Od–Do.
+    const rows = historyRows.filter(p => p.datumISO >= state.periodFrom && p.datumISO <= state.periodTo);
     if (!rows.length) return;
+
     const s = summary(rows);
     const visitors = rows.filter(p => Number.isFinite(p.navstevnici)).map(p => p.navstevnici);
-    const dates = rows.map(p => p.datumISO).sort();
+    const historyDates = historyRows.map(p => p.datumISO).sort();
     const byDay = detailBreakdown(rows, p => dayIndex(p.datumISO), k => dayLabel(Number(k))).sort((a, b) => Number(a.key) - Number(b.key));
     const byTime = detailBreakdown(rows, p => p.od, k => k).sort((a, b) => a.key.localeCompare(b.key));
     const months = byMonth(rows);
+    const selectedPeriodLabel = `${formatDatumISO(state.periodFrom)} – ${formatDatumISO(state.periodTo)}`;
 
     const backdrop = document.createElement('div');
     backdrop.className = 'cs-modal-backdrop';
     backdrop.innerHTML = `<div class="cs-modal">
-      <div class="cs-modal-head"><div><h2><span class="cs-dot ${typ}"></span>${esc(nazev)}</h2><div class="cs-subtitle">První vysílání ${formatDatumISO(dates[0])} • poslední vysílání ${formatDatumISO(dates.at(-1))}</div></div><button class="cs-close" id="cs-detail-close">×</button></div>
+      <div class="cs-modal-head"><div><h2><span class="cs-dot ${typ}"></span>${esc(nazev)}</h2><div class="cs-subtitle">První vysílání ${formatDatumISO(historyDates[0])} • poslední vysílání ${formatDatumISO(historyDates.at(-1))}</div></div><button class="cs-close" id="cs-detail-close">×</button></div>
       <div class="cs-modal-body">
+        <div class="cs-period-banner"><b>Zvolené období:</b> ${esc(selectedPeriodLabel)} <span>• všechny statistiky detailu níže se počítají z tohoto období</span></div>
         <div class="cs-kpis">
-          ${kpi('Projekce celkem', fmtInt.format(s.projekce), 'od prvního vysílání')}
+          ${kpi('Projekce v období', fmtInt.format(s.projekce), selectedPeriodLabel)}
           ${kpi('Návštěvníci', fmtInt.format(s.navstevnici), 'evidováno v Carině jako Sold')}
           ${kpi('Ø / projekci', fmt1.format(s.prumer), 'průměr')}
           ${kpi('Minimum / maximum', visitors.length ? `${fmtInt.format(Math.min(...visitors))} / ${fmtInt.format(Math.max(...visitors))}` : '—', 'na jedné projekci')}
@@ -677,12 +686,12 @@
           <div class="cs-card"><h3>Podle začátku – Ø návštěvníků</h3>${bars(byTime, 'prumer', 'label', v => fmt1.format(v), 20)}</div>
         </div>
         <div class="cs-grid-2">
-          <div class="cs-card"><h3>Projekce po měsících</h3>${bars(months, 'projekce', 'label', v => fmtInt.format(v), 60)}</div>
-          <div class="cs-card"><h3>Návštěvnost po měsících</h3>${bars(months, 'navstevnici', 'label', v => fmtInt.format(v), 60)}</div>
+          <div class="cs-card"><h3>Projekce po měsících ve zvoleném období</h3>${bars(months, 'projekce', 'label', v => fmtInt.format(v), 60)}</div>
+          <div class="cs-card"><h3>Návštěvnost po měsících ve zvoleném období</h3>${bars(months, 'navstevnici', 'label', v => fmtInt.format(v), 60)}</div>
         </div>
         <div class="cs-card cs-section"><h3>Den × čas – Ø návštěvníků</h3>${heatmap(rows)}</div>
         <details class="cs-card cs-section cs-history-details">
-          <summary>Jednotlivé projekce – data Cariny</summary>
+          <summary>Jednotlivé projekce ve zvoleném období – data Cariny</summary>
           <div class="cs-inline-note" style="margin:10px 0">Prodané = <b>Sold</b>, neprodané = <b>Available</b>, počet míst v sále = <b>Total</b> (pro výpočty maximálně 278).</div>
           <div class="cs-table-wrap"><table><thead><tr>
             <th>Datum</th><th>Čas</th><th>Prodané</th><th>Neprodané</th><th>Počet míst v sále</th><th>Obsazenost</th><th>Carina</th>
