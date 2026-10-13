@@ -106,7 +106,20 @@
   }
 
   function jeProbehly(p) {
-    return datumCas(p, true).getTime() < Date.now();
+    // Statistiky jsou záměrně stabilní během celého dne:
+    // dnešní projekce se nezahrnují bez ohledu na to, zda už skončily.
+    const dnes = new Date();
+    dnes.setHours(0, 0, 0, 0);
+    const [y, m, d] = p.datumISO.split('-').map(Number);
+    const datumPoradu = new Date(y, m - 1, d, 0, 0, 0, 0);
+    return datumPoradu.getTime() < dnes.getTime();
+  }
+
+  function vcerejsiDatumISO() {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
   function formatDatumISO(iso) {
@@ -434,10 +447,8 @@
       const barClass = x.typ === 'modry' ? 'cs-bar-fill-blue' : 'cs-bar-fill-brown';
       const typeColor = x.typ === 'modry' ? '#1d4ed8' : '#7c2d12';
       const barColor = x.typ === 'modry' ? '#2563eb' : '#7f1d1d';
-      const typeBadge = showType
-        ? ` <span style="display:inline-block;padding:2px 7px;border-radius:999px;background:${barColor}!important;color:#fff!important;font-size:11px;font-weight:800;white-space:nowrap">${typeText}</span>`
-        : '';
-      return `<div class="cs-bar-row"><div title="${esc(label)}" style="color:${typeColor}!important;font-weight:700">${esc(x.nazev)}${typeBadge}</div><div class="cs-bar-track"><div class="cs-bar-fill ${barClass}" style="width:${clamp(val / max * 100, 1, 100)}%;background-color:${barColor}!important;background-image:none!important"></div></div><div class="cs-bar-val">${esc(fmtInt.format(val))}</div></div>`;
+      const typeTextInline = showType ? ` (${typeText})` : '';
+      return `<div class="cs-bar-row"><div title="${esc(label)}" style="color:${typeColor}!important;font-weight:700">${esc(x.nazev)}${esc(typeTextInline)}</div><div class="cs-bar-track"><div class="cs-bar-fill ${barClass}" style="width:${clamp(val / max * 100, 1, 100)}%;background-color:${barColor}!important;background-image:none!important"></div></div><div class="cs-bar-val">${esc(fmtInt.format(val))}</div></div>`;
     }).join('')}</div>`;
   }
 
@@ -733,7 +744,7 @@
   root.id = ROOT_ID;
   root.innerHTML = `<div class="cs-shell">
     <div class="cs-header">
-      <div><h1>Statistiky pořadů Carina</h1><div class="cs-subtitle">Proběhlé školní (modré) a veřejné (hnědé) pořady</div></div>
+      <div><h1>Statistiky pořadů Carina</h1><div class="cs-subtitle">Školní (modré) a veřejné (hnědé) pořady — data vždy do včerejška</div></div>
       <button class="cs-close" id="cs-close">×</button>
     </div>
     <div class="cs-body">
@@ -824,7 +835,7 @@
       state.all = all;
       state.loaded = true;
       const missing = all.filter(p => !Number.isFinite(p.navstevnici)).length;
-      setStatus(`Hotovo: načtena historie od 06/2025 — ${fmtInt.format(all.length)} proběhlých projekcí, ${fmtInt.format(new Set(all.map(p => `${p.typ}|${p.nazev}`)).size)} titulů.${missing ? ` U ${missing} projekcí nebyl dostupný údaj Sold.` : ''}`);
+      setStatus(`Hotovo: načtena historie od 06/2025 do ${formatDatumISO(vcerejsiDatumISO())} — ${fmtInt.format(all.length)} projekcí, ${fmtInt.format(new Set(all.map(p => `${p.typ}|${p.nazev}`)).size)} titulů.${missing ? ` U ${missing} projekcí nebyl dostupný údaj Sold.` : ''}`);
       render();
     } catch (e) {
       console.error('Carina statistiky:', e);

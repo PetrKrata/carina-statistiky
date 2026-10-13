@@ -15,3 +15,7 @@ Dashboard pro statistiky proběhlých školních (modrých) a veřejných (hněd
 ## Důležitá interpretace
 
 Pole `sold` je nejlepší dostupný údaj Cariny pro evidovanou návštěvnost/prodaná místa. Nemusí být totožné s fyzickým počtem lidí, kteří skutečně prošli do sálu.
+
+## Verze v11
+- Statistiky zahrnují pouze projekce do včerejšího dne včetně. Dnešní projekce se nezapočítávají ani po skončení, takže se výsledky během dne nemění.
+- U žebříčku „Nejnavštěvovanější pořady“ je typ pořadu zobrazen pouze jako text `(školní)` / `(veřejnost)` bez barevné bubliny; barevné rozlišení názvu a sloupce zůstává.
