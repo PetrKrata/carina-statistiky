@@ -24,3 +24,8 @@ Pole `sold` je nejlepší dostupný údaj Cariny pro evidovanou návštěvnost/p
 - Detail konkrétního pořadu respektuje datumový filtr Od–Do z hlavního přehledu.
 - KPI, rozpad podle dnů/časů, měsíční grafy, heatmapa a seznam projekcí jsou jen za zvolené období.
 - První a poslední vysílání zůstávají informací z celé dostupné historie od 1. 6. 2025.
+
+
+## Dokumentace údajů
+
+Stránka `index.html` obsahuje instalační návod i vysvětlení významu hlavních statistik a údajů v detailu pořadu.

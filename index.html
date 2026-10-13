@@ -7,16 +7,23 @@
   <link rel="stylesheet" href="style.css">
   <style>
     body{margin:0;background:#eef2f6;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#1f2937}
-    .landing{max-width:860px;margin:60px auto;padding:0 20px}.box{background:white;border:1px solid #d7dde5;border-radius:14px;padding:24px;margin:16px 0;box-shadow:0 8px 30px rgba(16,24,40,.06)}
-    h1{margin:0 0 8px}.muted{color:#667085}.bookmark{display:inline-block;background:#111827;color:white;text-decoration:none;padding:12px 18px;border-radius:9px;font-weight:800;margin:8px 8px 8px 0}.copy{border:0;background:#2563eb;color:white;padding:12px 18px;border-radius:9px;font-weight:800;cursor:pointer}.code{word-break:break-all;background:#f6f8fa;border:1px solid #e5e7eb;padding:12px;border-radius:8px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}ol{line-height:1.7}
+    .landing{max-width:980px;margin:60px auto;padding:0 20px}
+    .box{background:white;border:1px solid #d7dde5;border-radius:14px;padding:24px;margin:16px 0;box-shadow:0 8px 30px rgba(16,24,40,.06)}
+    h1{margin:0 0 8px} h2{margin-top:0} h3{margin-bottom:8px}
+    .muted{color:#667085}.bookmark{display:inline-block;background:#111827;color:white;text-decoration:none;padding:12px 18px;border-radius:9px;font-weight:800;margin:8px 8px 8px 0}.copy{border:0;background:#2563eb;color:white;padding:12px 18px;border-radius:9px;font-weight:800;cursor:pointer}.code{word-break:break-all;background:#f6f8fa;border:1px solid #e5e7eb;padding:12px;border-radius:8px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}ol{line-height:1.7}
+    .note{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 16px;line-height:1.55}
+    .defs{width:100%;border-collapse:collapse;margin-top:12px}.defs th,.defs td{text-align:left;vertical-align:top;border-bottom:1px solid #e5e7eb;padding:11px 10px;line-height:1.45}.defs th{background:#f8fafc;font-size:14px}.defs td:first-child{font-weight:750;white-space:nowrap;width:190px}.defs tr:last-child td{border-bottom:0}
+    .small{font-size:14px}.type-school{color:#0b22a8;font-weight:750}.type-public{color:#8f1d1d;font-weight:750}
+    @media(max-width:700px){.landing{margin:20px auto}.box{padding:18px}.defs,.defs tbody,.defs tr,.defs td{display:block}.defs thead{display:none}.defs td{border:0;padding:5px 0}.defs td:first-child{width:auto;padding-top:14px}.defs tr{border-bottom:1px solid #e5e7eb;padding-bottom:10px}}
   </style>
 </head>
 <body>
   <main class="landing">
     <div class="box">
       <h1>Carina – statistiky pořadů</h1>
-      <p class="muted">Dashboard proběhlých modrých a hnědých pořadů. Skript se spouští přímo v přihlášené Carině.</p>
+      <p class="muted">Dashboard proběhlých školních (modrých) a veřejných (hnědých) pořadů. Skript se spouští přímo v přihlášené Carině.</p>
     </div>
+
     <div class="box">
       <h2>Instalace záložky</h2>
       <ol>
@@ -29,10 +36,53 @@
       <p id="copy-status" class="muted"></p>
       <div id="code" class="code"></div>
     </div>
+
     <div class="box">
-      <h2>Co dashboard počítá</h2>
-      <p>Počet projekcí, tituly, evidovanou návštěvnost, průměr/medián, obsazenost, školní vs. veřejnost, pořadové žebříčky, měsíční trend, detail pořadu podle dnů a časů a CSV export.</p>
-      <p class="muted">Pozn.: „návštěvníci“ jsou technicky počítáni jako <b>celková kapacita − aktuálně volná místa</b> z kapacitního endpointu Cariny.</p>
+      <h2>Jak se statistika počítá</h2>
+      <p>Výchozí období je od <b>1. 6. 2025</b> do <b>včerejška</b>. Obě data lze změnit po jednotlivých dnech. Dnešní a budoucí projekce se do statistiky nikdy nezapočítávají, takže se výsledky během dne nemění.</p>
+      <p>Za návštěvnost se používá hodnota <b>Sold</b> z Cariny. Maximální kapacita používaná při výpočtech je <b>278 míst</b>.</p>
+      <div class="note"><b>Typ pořadu:</b> <span class="type-school">Školní</span> = modrý pořad v Carině, <span class="type-public">Veřejnost</span> = hnědý pořad v Carině.</div>
+    </div>
+
+    <div class="box">
+      <h2>Co znamenají čísla v přehledu</h2>
+      <table class="defs">
+        <thead><tr><th>Údaj</th><th>Význam</th></tr></thead>
+        <tbody>
+          <tr><td>Projekce</td><td>Počet proběhlých projekcí ve zvoleném období.</td></tr>
+          <tr><td>Tituly</td><td>Počet různých pořadů. Stejný název vedený jako školní i veřejný se rozlišuje podle typu pořadu.</td></tr>
+          <tr><td>Návštěvníci</td><td>Součet hodnot <b>Sold</b> – tedy prodaných/evidovaných míst – ze všech započítaných projekcí.</td></tr>
+          <tr><td>Ø na projekci</td><td>Průměrný počet prodaných míst na jednu projekci: návštěvníci ÷ počet projekcí.</td></tr>
+          <tr><td>Obsazenost</td><td>Poměr prodaných míst k počtu míst v sále, vyjádřený v procentech.</td></tr>
+          <tr><td>Podíl všech projekcí</td><td>Kolik procent všech projekcí ve zvoleném období tvoří školní nebo veřejné pořady.</td></tr>
+          <tr><td>Podíl všech návštěvníků</td><td>Kolik procent všech návštěvníků ve zvoleném období připadá na školní nebo veřejné pořady.</td></tr>
+          <tr><td>Nejnavštěvovanější pořady</td><td>Žebříček pořadů podle celkového počtu prodaných míst ve zvoleném období.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box">
+      <h2>Co znamenají údaje v detailu pořadu</h2>
+      <p class="muted small">Výpočty v detailu respektují stejné zvolené období jako hlavní přehled. První a poslední vysílání se naopak vztahuje k celé načtené historii od 1. 6. 2025.</p>
+      <table class="defs">
+        <thead><tr><th>Údaj</th><th>Význam</th></tr></thead>
+        <tbody>
+          <tr><td>První vysílání</td><td>První nalezená projekce pořadu v celé historii od 1. 6. 2025.</td></tr>
+          <tr><td>Poslední vysílání</td><td>Poslední nalezená proběhlá projekce pořadu v celé historii.</td></tr>
+          <tr><td>Prodané</td><td>Hodnota <b>Sold</b> z Cariny.</td></tr>
+          <tr><td>Neprodané</td><td>Hodnota <b>Available</b> – místa, která byla v Carině vedena jako volná.</td></tr>
+          <tr><td>Počet míst v sále</td><td>Kapacita použitá statistikou pro danou projekci; při výpočtech je maximálně 278 míst.</td></tr>
+          <tr><td>Obsazenost projekce</td><td>Prodané ÷ počet míst v sále × 100.</td></tr>
+          <tr><td>Den × čas</td><td>Průměrná návštěvnost konkrétní kombinace dne v týdnu a času. Tři nejlepší hodnoty jsou zvýrazněné.</td></tr>
+          <tr><td>Měsíční přehled</td><td>Vývoj počtu projekcí a návštěvnosti v jednotlivých měsících.</td></tr>
+          <tr><td>Carina</td><td>Odkaz na konkrétní projekci v Carině.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box">
+      <h2>Poznámka k interpretaci</h2>
+      <p>Statistika pracuje s údaji evidovanými v Carině. Hodnota <b>Sold</b> znamená prodaná/evidovaná místa; nemusí tedy být totožná s fyzicky spočítaným počtem lidí, kteří skutečně vstoupili do sálu.</p>
     </div>
   </main>
   <script src="app.js"></script>

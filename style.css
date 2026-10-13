@@ -160,3 +160,12 @@
   user-select: none;
 }
 #carina-statistiky-root .cs-history-all { margin-top: 14px; }
+
+#carina-statistiky-root a.cs-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+#carina-statistiky-root a.cs-button:hover { text-decoration: none; }
