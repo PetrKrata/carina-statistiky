@@ -58,7 +58,7 @@
 }
 #carina-statistiky-root .cs-segmented { display: flex; border: 1px solid #cbd5e1; border-radius: 9px; overflow: hidden; background: white; }
 #carina-statistiky-root .cs-segmented button {
-  border: 0; border-right: 1px solid #cbd5e1; padding: 9px 13px; background: white; cursor: pointer; font-weight: 700;
+  border: 0; border-right: 1px solid #cbd5e1; padding: 6px 10px; min-height: 34px; background: white; cursor: pointer; font-weight: 700; font-size: 13px;
 }
 #carina-statistiky-root .cs-segmented button:last-child { border-right: 0; }
 #carina-statistiky-root .cs-segmented button.active { background: #111827; color: white; }
@@ -67,6 +67,7 @@
   background: var(--cs-accent); color: white;
 }
 #carina-statistiky-root .cs-button.secondary { background: #e8edf4; color: #243044; }
+#carina-statistiky-root #cs-howto { margin-left: auto; min-height: 34px; padding: 6px 11px; font-size: 13px; font-weight: 700; align-self: flex-end; white-space: nowrap; }
 #carina-statistiky-root .cs-button:disabled { opacity: .55; cursor: progress; }
 #carina-statistiky-root .cs-status { min-height: 24px; padding: 10px 2px 2px; color: var(--cs-muted); font-size: 14px; }
 #carina-statistiky-root .cs-status.error { color: var(--cs-danger); font-weight: 700; }

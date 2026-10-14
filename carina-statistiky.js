@@ -763,7 +763,7 @@
         <div class="cs-field"><span>Typ pořadu</span><div class="cs-segmented" id="cs-type"><button class="active" data-filter="vse">Všechny</button><button data-filter="modry">🔵 Školní</button><button data-filter="hnedy">🟤 Veřejnost</button></div></div>
         <label class="cs-field">Hledat pořad<input type="search" id="cs-search" placeholder="název pořadu"></label>
         <button class="cs-button" id="cs-load">Načíst statistiky</button>
-        <a class="cs-button secondary" id="cs-howto" href="${esc(howToUrl)}" target="_blank" rel="noopener noreferrer" title="Návod a vysvětlení statistik">HOW TO / Nápověda</a>
+        <a class="cs-button secondary" id="cs-howto" href="${esc(howToUrl)}" target="_blank" rel="noopener noreferrer" title="Návod a vysvětlení statistik">Nápověda</a>
       </div>
       <div class="cs-status" id="cs-status">Připraveno.</div>
       <div id="cs-content"></div>
