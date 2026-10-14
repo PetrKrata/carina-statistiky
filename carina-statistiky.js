@@ -760,7 +760,7 @@
       <div class="cs-controls">
         <label class="cs-field">Od data<input type="date" id="cs-from" min="2025-06-01" max="${yesterdayISO}" value="${defaultStart}"></label>
         <label class="cs-field">Do data<input type="date" id="cs-to" min="2025-06-01" max="${yesterdayISO}" value="${yesterdayISO}"></label>
-        <div class="cs-field"><span>Typ pořadu</span><div class="cs-segmented" id="cs-type"><button class="active" data-filter="vse">Všechny</button><button data-filter="modry">🔵 Školní</button><button data-filter="hnedy">🟤 Veřejnost</button></div></div>
+        <div class="cs-field"><span>Typ pořadu</span><div class="cs-segmented" id="cs-type"><button class="active" data-filter="vse">Všechny</button><button data-filter="modry"><span class="cs-type-dot school"></span>Školní</button><button data-filter="hnedy"><span class="cs-type-dot public"></span>Veřejnost</button></div></div>
         <label class="cs-field">Hledat pořad<input type="search" id="cs-search" placeholder="název pořadu"></label>
         <button class="cs-button" id="cs-load">Načíst statistiky</button>
         <a class="cs-button secondary" id="cs-howto" href="${esc(howToUrl)}" target="_blank" rel="noopener noreferrer" title="Návod a vysvětlení statistik">Nápověda</a>
